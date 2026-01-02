@@ -49,6 +49,8 @@ export default function Navbar() {
                 <Image
                   src={session.user.image}
                   alt={session.user.name || "User"}
+                  width={40}
+                  height={40}
                   className="w-8 h-8 rounded-full border-2 border-[#00ff88]"
                 />
               )}

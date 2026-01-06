@@ -34,9 +34,9 @@ export default function GameFeatures() {
                 key={index}
                 className="bg-gradient-to-br from-gray-900/50 to-transparent border border-gray-800 rounded-2xl p-8 hover:border-[#00ff88] transition group"
               >
-                <div className="w-12 h-12 bg-gradient-to-br from-[#00ff88]/20 to-transparent rounded-xl flex items-center justify-center mb-6 text-2xl group-hover:scale-110 transition">
+                {/* <div className="w-12 h-12 bg-gradient-to-br from-[#00ff88]/20 to-transparent rounded-xl flex items-center justify-center mb-6 text-2xl group-hover:scale-110 transition">
                   {feature.icon}
-                </div>
+                </div> */}
                 <h3 className="text-white font-bold text-xl mb-4">{feature.title}</h3>
                 <p className="text-gray-400 leading-relaxed">{feature.description}</p>
               </div>

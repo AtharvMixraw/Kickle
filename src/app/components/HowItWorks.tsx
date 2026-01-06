@@ -30,9 +30,9 @@ export default function HowItWorks() {
               <h2 className="text-4xl font-bold text-white mb-2">How It Works</h2>
               <p className="text-gray-400">Master the grid in four simple steps</p>
             </div>
-            <a href="#" className="text-[#00ff88] hover:text-[#00dd77] font-medium flex items-center gap-2">
+            {/* <a href="#" className="text-[#00ff88] hover:text-[#00dd77] font-medium flex items-center gap-2">
               View full rules <span>→</span>
-            </a>
+            </a> */}
           </div>
           
           <div className="grid md:grid-cols-4 gap-8">

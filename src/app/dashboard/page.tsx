@@ -90,7 +90,7 @@ export default function DashboardPage() {
         {/* Stats Module */}
         <div className="flex flex-col gap-4">
           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
-            Today's Stats
+            Today&apos;s Stats
           </h3>
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-[#1a1a1a] p-4 rounded-xl border border-white/5 flex flex-col gap-1">
@@ -283,7 +283,7 @@ export default function DashboardPage() {
               activeTab === "today" ? "bg-white/10 text-white shadow-sm" : "text-gray-400 hover:text-white"
             }`}
           >
-            Today's Top 10
+            Today&apos;s Top 10
           </button>
           <button
             onClick={() => setActiveTab("weekly")}

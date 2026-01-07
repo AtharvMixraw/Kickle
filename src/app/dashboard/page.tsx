@@ -36,10 +36,9 @@ export default function DashboardPage() {
 
   // Mock grid state - in production, this would come from your backend
   const gridState = [
-    [null, null, "Drogba", null, null],
-    [null, null, null, "Pirlo", null],
-    ["Ramos", null, null, null, null],
-    [null, null, null, null, null]
+    [null, "Drogba", null],
+    [null, null, "Pirlo"],
+    ["Ramos", null, null]
   ];
 
   const leaderboardData = [
@@ -177,7 +176,7 @@ export default function DashboardPage() {
           {/* Game Grid Container */}
           <div className="w-full max-w-3xl">
             {/* Top Headers */}
-            <div className="grid grid-cols-5 mb-2 gap-2">
+            <div className="grid grid-cols-4 mb-2 gap-2">
               <div className="col-span-1"></div>
               <div className="flex flex-col items-center justify-center bg-[#121212] p-2 rounded-lg border border-white/10 aspect-[4/3]">
                 <div className="w-10 h-10 bg-white rounded-full mb-2 flex items-center justify-center text-xl">
@@ -195,23 +194,19 @@ export default function DashboardPage() {
                 <span className="text-3xl mb-1">🏆</span>
                 <span className="text-xs font-bold text-center text-gray-300">World Cup Winner</span>
               </div>
-              <div className="flex flex-col items-center justify-center bg-[#121212] p-2 rounded-lg border border-white/10 aspect-[4/3]">
-                <span className="text-3xl mb-1">🇮🇹</span>
-                <span className="text-xs font-bold text-center text-gray-300">Italian</span>
-              </div>
             </div>
 
             {/* Grid Rows */}
             <div className="flex flex-col gap-2">
-              {["FW", "MF", "DF", "GK"].map((position, rowIndex) => (
-                <div key={position} className="grid grid-cols-5 gap-2 h-28">
+              {["FW", "MF", "DF"].map((position, rowIndex) => (
+                <div key={position} className="grid grid-cols-4 gap-2 h-28">
                   <div className="col-span-1 flex flex-col items-center justify-center bg-[#121212] p-2 rounded-lg border border-white/10">
                     <span className="text-2xl font-black text-gray-600 mb-1">{position}</span>
                     <span className="text-xs font-bold text-center text-gray-300">
-                      {position === "FW" ? "Forward" : position === "MF" ? "Midfielder" : position === "DF" ? "Defender" : "Goalkeeper"}
+                      {position === "FW" ? "Forward" : position === "MF" ? "Midfielder" : "Defender"}
                     </span>
                   </div>
-                  {[0, 1, 2, 3].map((colIndex) => {
+                  {[0, 1, 2].map((colIndex) => {
                     const player = gridState[rowIndex]?.[colIndex];
                     return player ? (
                       <div key={colIndex} className="col-span-1 bg-green-900/20 rounded-xl border border-[#36e27b]/50 flex flex-col items-center justify-center relative overflow-hidden">

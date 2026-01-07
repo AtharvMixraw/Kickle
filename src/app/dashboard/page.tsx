@@ -2,12 +2,21 @@
 
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export default function DashboardPage() {
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
+
+  // CHANGED: Added state management for grid and editing
+  const [gridState, setGridState] = useState<(string | null)[][]>([
+    [null, null, null],
+    [null, null, null],
+    [null, null, null]
+  ]);
+  const [editingCell, setEditingCell] = useState<{row: number, col: number} | null>(null);
+
 
   useEffect(() => {
     if (!isPending && !session) {
@@ -32,20 +41,58 @@ export default function DashboardPage() {
     router.push("/");
   };
 
-  // Mock grid state - in production, this would come from your backend
-  const gridState = [
-    [null, "Drogba", null],
-    [null, null, "Pirlo"],
-    ["Ramos", null, null]
-  ];
+  // // Mock grid state - in production, this would come from your backend
+  // const gridState = [
+  //   [null, "Drogba", null],
+  //   [null, null, "Pirlo"],
+  //   ["Ramos", null, null]
+  // ];
 
-  // Remove unused leaderboard data
+  //CHANGED: Added handler functions for cell editing
+  const handleCellClick = (rowIndex: number, colIndex: number) => {
+    setEditingCell({ row: rowIndex, col: colIndex });
+  };
+
+  const handleInputChange = (rowIndex: number, colIndex: number, value: string) => {
+    const newGridState = [...gridState];
+    newGridState[rowIndex][colIndex] = value || null;
+    setGridState(newGridState);
+  };
+
+  const handleInputBlur = () => {
+    setEditingCell(null);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleInputBlur();
+    }
+  };
+
+  // CHANGED: Added submit handler
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch('/api/submit-grid', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ gridState }),
+      });
+      
+      if (response.ok) {
+        console.log('Grid submitted successfully');
+      }
+    } catch (error) {
+      console.error('Error submitting grid:', error);
+    }
+  };
+
+
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans flex overflow-hidden">
-      {/* Left Sidebar - User Profile */}
       <aside className="hidden lg:flex flex-col w-[280px] bg-[#121212] border-r border-white/5 h-screen p-6 gap-6 overflow-y-auto">
-        {/* Profile Section */}
         <div className="flex flex-col items-center gap-4 py-4">
           <div className="relative group cursor-pointer">
             <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#36e27b] p-1">
@@ -68,7 +115,6 @@ export default function DashboardPage() {
 
         <div className="flex-1"></div>
 
-        {/* Sign Out Button */}
         <div className="flex flex-col gap-3">
           <button 
             onClick={handleSignOut}
@@ -82,13 +128,10 @@ export default function DashboardPage() {
         </div>
       </aside>
 
-      {/* Center Stage - Game Grid */}
       <section className="flex-1 flex flex-col h-screen bg-[#050505] relative overflow-y-auto">
-        {/* Ambient Background Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-[#36e27b]/5 blur-[120px] rounded-full pointer-events-none z-0"></div>
 
         <div className="relative z-10 flex flex-col items-center justify-start min-h-full py-8 px-4">
-          {/* Game Header */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 mb-2 px-3 py-1 rounded-full bg-[#36e27b]/10 border border-[#36e27b]/20">
               <span className="w-2 h-2 rounded-full bg-[#36e27b] animate-pulse"></span>
@@ -99,7 +142,6 @@ export default function DashboardPage() {
             <h1 className="text-4xl font-extrabold text-white tracking-tight mb-4">
               Football Grid Challenge
             </h1>
-            {/* Timer */}
             <div className="flex items-center justify-center gap-1 font-mono text-3xl font-bold text-white/90 bg-[#121212]/50 backdrop-blur px-6 py-2 rounded-lg border border-white/10 inline-block shadow-lg">
               <span>00</span>
               <span className="text-[#36e27b]">:</span>
@@ -109,9 +151,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Game Grid Container */}
           <div className="w-full max-w-3xl">
-            {/* Top Headers */}
             <div className="grid grid-cols-4 mb-2 gap-2">
               <div className="col-span-1"></div>
               <div className="flex flex-col items-center justify-center bg-[#121212] p-2 rounded-lg border border-white/10 aspect-[4/3]">
@@ -132,7 +172,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Grid Rows */}
             <div className="flex flex-col gap-2">
               {["FW", "MF", "DF"].map((position, rowIndex) => (
                 <div key={position} className="grid grid-cols-4 gap-2 h-28">
@@ -144,14 +183,35 @@ export default function DashboardPage() {
                   </div>
                   {[0, 1, 2].map((colIndex) => {
                     const player = gridState[rowIndex]?.[colIndex];
+                    const isEditing = editingCell?.row === rowIndex && editingCell?.col === colIndex;
+
+                    // CHANGED: Added conditional rendering for input vs display
+                    if (isEditing) {
+                      return (
+                        <div key={colIndex} className="col-span-1 bg-[#1a1a1a] rounded-xl border border-[#36e27b] flex items-center justify-center p-2">
+                          <input
+                            type="text"
+                            autoFocus
+                            value={player || ''}
+                            onChange={(e) => handleInputChange(rowIndex, colIndex, e.target.value)}
+                            onBlur={handleInputBlur}
+                            onKeyPress={handleKeyPress}
+                            className="w-full bg-transparent text-white text-center text-sm font-bold outline-none"
+                            placeholder="Player name"
+                          />
+                        </div>
+                      );
+                    }
+
                     return player ? (
-                      <div key={colIndex} className="col-span-1 bg-green-900/20 rounded-xl border border-[#36e27b]/50 flex flex-col items-center justify-center relative overflow-hidden">
+                      <div 
+                        key={colIndex} 
+                        onClick={() => handleCellClick(rowIndex, colIndex)}
+                        className="col-span-1 bg-green-900/20 rounded-xl border border-[#36e27b]/50 flex flex-col items-center justify-center relative overflow-hidden cursor-pointer hover:border-[#36e27b]"
+                      >
                         <div className="relative z-10 flex flex-col items-center">
                           <span className="text-xs font-bold text-[#36e27b] bg-black/60 px-2 py-0.5 rounded-full backdrop-blur-sm mb-1">
                             {player}
-                          </span>
-                          <span className="text-[10px] text-gray-300">
-                            {player === "Drogba" ? "12%" : player === "Pirlo" ? "34%" : "45%"} Guessed
                           </span>
                         </div>
                         <div className="absolute top-2 right-2 w-4 h-4 bg-[#36e27b] rounded-full flex items-center justify-center">
@@ -161,7 +221,11 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     ) : (
-                      <button key={colIndex} className="col-span-1 bg-[#1a1a1a] rounded-xl border border-white/5 flex items-center justify-center relative overflow-hidden group hover:border-[#36e27b] hover:bg-[#222] transition-all">
+                      <button 
+                        key={colIndex} 
+                        onClick={() => handleCellClick(rowIndex, colIndex)}
+                        className="col-span-1 bg-[#1a1a1a] rounded-xl border border-white/5 flex items-center justify-center relative overflow-hidden group hover:border-[#36e27b] hover:bg-[#222] transition-all"
+                      >
                         <span className="text-2xl text-gray-600 group-hover:text-[#36e27b] transition-colors">+</span>
                       </button>
                     );
@@ -171,9 +235,11 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="mt-8 flex flex-col items-center gap-4 w-full max-w-sm">
-            <button className="w-full h-14 bg-[#36e27b] hover:bg-[#2dd670] text-black text-lg font-bold rounded-full shadow-[0_0_20px_rgba(54,226,123,0.3)] transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2">
+            <button 
+              onClick={handleSubmit}
+              className="w-full h-14 bg-[#36e27b] hover:bg-[#2dd670] text-black text-lg font-bold rounded-full shadow-[0_0_20px_rgba(54,226,123,0.3)] transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2"
+            >
               Submit Grid
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />

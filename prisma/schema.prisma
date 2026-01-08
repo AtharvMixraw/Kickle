@@ -15,8 +15,9 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts Account[]
-  sessions Session[]
+  accounts    Account[]
+  sessions    Session[]
+  submissions GridSubmission[]
 }
 
 model Session {
@@ -33,19 +34,19 @@ model Session {
 }
 
 model Account {
-  id                String  @id @default(cuid())
-  accountId         String
-  providerId        String
-  userId            String
-  accessToken       String?
-  refreshToken      String?
-  idToken           String?
-  accessTokenExpiresAt DateTime?
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
   refreshTokenExpiresAt DateTime?
-  scope             String?
-  password          String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -61,4 +62,66 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@unique([identifier, value])
+}
+
+// ============================================
+// GRID GAME MODELS
+// ============================================
+
+model Grid {
+  id         String   @id @default(cuid())
+  gridNumber Int      @unique // Daily grid number (e.g., 104)
+  date       DateTime @unique // Date of the grid (YYYY-MM-DD)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  cells       GridCell[]
+  submissions GridSubmission[]
+}
+
+model GridCell {
+  id     String @id @default(cuid())
+  gridId String
+  row    Int // 0, 1, 2
+  col    Int // 0, 1, 2
+
+  // Row criteria (2 clubs + 1 award)
+  rowType  String // "club" or "award"
+  rowValue String // "Real Madrid", "UCL", etc.
+
+  // Column criteria (2 countries + 1 award)
+  colType  String // "country" or "award"
+  colValue String // "Brazil", "Ballon d'Or", etc.
+
+  grid    Grid         @relation(fields: [gridId], references: [id], onDelete: Cascade)
+  answers CellAnswer[]
+
+  @@unique([gridId, row, col])
+}
+
+model GridSubmission {
+  id          String   @id @default(cuid())
+  userId      String
+  gridId      String
+  score       Int // 0-9
+  submittedAt DateTime @default(now())
+
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  grid    Grid         @relation(fields: [gridId], references: [id], onDelete: Cascade)
+  answers CellAnswer[]
+
+  // One attempt per user per grid
+  @@unique([userId, gridId])
+}
+
+model CellAnswer {
+  id           String  @id @default(cuid())
+  submissionId String
+  cellId       String
+  playerName   String
+  isCorrect    Boolean
+  llmReasoning String? // Why it's correct/incorrect
+
+  submission GridSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  cell       GridCell       @relation(fields: [cellId], references: [id], onDelete: Cascade)
 }

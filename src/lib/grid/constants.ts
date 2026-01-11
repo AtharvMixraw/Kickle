@@ -9,7 +9,7 @@ export const CLUBS: Record<ClubName, ClubMetadata> = {
   },
   "Inter Miami": {
     name: "Inter Miami",
-    icon: "🩷",
+    icon: "👚",
     color: "#F7B5CD"
   },
   "Juventus": {
@@ -102,12 +102,12 @@ export const AWARDS: Record<AwardName, AwardMetadata> = {
   },
   "Ballon d'Or": {
     name: "Ballon d'Or",
-    icon: "⚽",
+    icon: "🌕",
     description: "Ballon d'Or Winner"
   },
   "Golden Boot": {
     name: "Golden Boot",
-    icon: "👢",
+    icon: "🦶",
     description: "Golden Boot Winner"
   }
 };

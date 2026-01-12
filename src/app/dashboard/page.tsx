@@ -18,6 +18,7 @@ export default function DashboardPage() {
   const [gridState, setGridState] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [noGridAvailable, setNoGridAvailable] = useState(false);
 
   // Modal states
   const [editingCell, setEditingCell] = useState<{ row: number; col: number; cell: GridCell } | null>(null);
@@ -46,8 +47,14 @@ export default function DashboardPage() {
   const fetchGrid = async () => {
     try {
       setLoading(true);
+      setNoGridAvailable(false);
       const response = await fetch("/api/grid/current");
       
+      if (response.status === 404) {
+        setNoGridAvailable(true);
+        return;
+      }
+
       if (!response.ok) {
         throw new Error("Failed to fetch grid");
       }
@@ -69,6 +76,7 @@ export default function DashboardPage() {
       }
     } catch (error) {
       console.error("Error fetching grid:", error);
+      setNoGridAvailable(true);
     } finally {
       setLoading(false);
     }
@@ -80,7 +88,7 @@ export default function DashboardPage() {
   };
 
   const handleCellClick = (row: number, col: number) => {
-    if (existingSubmission) return; // Can't edit after submission
+    if (existingSubmission) return;
 
     const cell = grid?.cells.find((c) => c.row === row && c.col === col);
     if (cell) {
@@ -100,7 +108,6 @@ export default function DashboardPage() {
   const handleSubmitGrid = async () => {
     if (!grid || existingSubmission) return;
 
-    // Check if all cells are filled
     const filledCells = Object.keys(gridState).length;
     if (filledCells !== 9) {
       alert("Please fill all 9 cells before submitting!");
@@ -110,7 +117,6 @@ export default function DashboardPage() {
     try {
       setSubmitting(true);
 
-      // Prepare answers
       const answers = grid.cells.map((cell) => ({
         cellId: cell.id,
         playerName: gridState[`${cell.row}-${cell.col}`] || "",
@@ -167,7 +173,79 @@ export default function DashboardPage() {
     );
   }
 
-  if (!session?.user || !grid) {
+  if (!session?.user) {
+    return null;
+  }
+
+  // No Grid Available State
+  if (noGridAvailable) {
+    return (
+      <div className="min-h-screen bg-[#050505] text-white font-sans flex overflow-hidden">
+        <aside className="hidden lg:flex flex-col w-[280px] bg-[#121212] border-r border-white/5 h-screen p-6 gap-6 overflow-y-auto">
+          <div className="flex flex-col items-center gap-4 py-4">
+            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#36e27b] p-1">
+              {session.user.image && (
+                <Image
+                  src={session.user.image}
+                  alt={session.user.name || "User"}
+                  width={88}
+                  height={88}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              )}
+            </div>
+            <div className="text-center">
+              <h2 className="text-xl font-bold text-white">{session.user.name || "Player"}</h2>
+              <p className="text-gray-400 text-sm mt-1">{session.user.email}</p>
+            </div>
+          </div>
+
+          <div className="flex-1"></div>
+
+          <button
+            onClick={handleSignOut}
+            className="flex items-center justify-center gap-2 w-full h-12 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-full transition-colors border border-white/10"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Sign Out
+          </button>
+        </aside>
+
+        <section className="flex-1 flex flex-col h-screen bg-[#050505] relative overflow-y-auto">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-[#36e27b]/5 blur-[120px] rounded-full pointer-events-none z-0"></div>
+
+          <div className="relative z-10 flex flex-col items-center justify-center min-h-full py-8 px-4">
+            <div className="text-center max-w-md">
+              <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-[#36e27b]/10 mb-6">
+                <svg className="w-12 h-12 text-[#36e27b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+
+              <h1 className="text-3xl font-extrabold text-white mb-4">
+                No Grid Available Today
+              </h1>
+              
+              <p className="text-gray-400 mb-8">
+                Today&apos;s grid hasn&apos;t been created yet. Check back soon for a new challenge!
+              </p>
+
+              <button
+                onClick={fetchGrid}
+                className="px-6 py-3 bg-[#36e27b] hover:bg-[#2dd670] text-black font-bold rounded-full transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(54,226,123,0.3)]"
+              >
+                Refresh
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  if (!grid) {
     return null;
   }
 
@@ -297,7 +375,6 @@ export default function DashboardPage() {
                       const answer = getCellAnswer(rowIndex, colIndex);
 
                       if (existingSubmission && answer) {
-                        // Show result
                         return (
                           <div
                             key={colIndex}
@@ -328,7 +405,6 @@ export default function DashboardPage() {
                       }
 
                       if (playerName) {
-                        // Show filled cell
                         return (
                           <button
                             key={colIndex}
@@ -340,7 +416,6 @@ export default function DashboardPage() {
                         );
                       }
 
-                      // Show empty cell
                       return (
                         <button
                           key={colIndex}
@@ -357,7 +432,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Submit Button */}
           {!existingSubmission && (
             <div className="mt-8 flex flex-col items-center gap-4 w-full max-w-sm">
               <button

@@ -121,6 +121,7 @@ model CellAnswer {
   playerName   String
   isCorrect    Boolean
   llmReasoning String? // Why it's correct/incorrect
+  suggestedAnswer String?
 
   submission GridSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   cell       GridCell       @relation(fields: [cellId], references: [id], onDelete: Cascade)

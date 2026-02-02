@@ -82,6 +82,7 @@ export async function POST(request: NextRequest) {
         playerName: answer.playerName,
         isCorrect: evaluation.isCorrect,
         llmReasoning: evaluation.reasoning,
+        suggestedAnswer: evaluation.suggestedAnswer, // ✅ Add this line
       };
     });
 

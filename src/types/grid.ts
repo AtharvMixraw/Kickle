@@ -56,6 +56,7 @@ export interface CellAnswer {
   playerName: string;
   isCorrect: boolean;
   llmReasoning?: string;
+  suggestedAnswer?: string | null;
 }
 
 // User's submission
@@ -97,6 +98,7 @@ export interface SubmitGridResponse {
 export interface LLMEvaluationResult {
   isCorrect: boolean;
   reasoning: string;
+  suggestedAnswer?: string | null;
 }
 
 // Helper type for rendering

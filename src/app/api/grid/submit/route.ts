@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     // Validate each answer with OpenAI
     const evaluationPromises = answers.map(async (answer) => {
-      const cell = grid.cells.find((c) => c.id === answer.cellId);
+      const cell = grid.cells.find((c: { id: string; }) => c.id === answer.cellId);
       
       if (!cell) {
         throw new Error(`Cell not found: ${answer.cellId}`);

@@ -59,7 +59,7 @@ export default function Navbar() {
           ) : (
             <button
               onClick={handleGoogleSignIn}
-              className="flex items-center gap-2 bg-white hover:bg-gray-100 text-black px-4 py-2 rounded-lg transition font-medium"
+              className="flex items-center gap-2 bg-white hover:bg-gray-100 text-black px-4 py-2 rounded-lg transition font-medium cursor-pointer"
             >
               {/* <span>🔐</span> */}
               <span>Sign in with Google</span>

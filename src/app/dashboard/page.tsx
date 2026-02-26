@@ -8,6 +8,7 @@ import PlayerInputModal from "../components/PlayerInputModal";
 import ResultsModal from "../components/ResultsModal";
 import type { Grid, GridCell, CellAnswer, GridSubmission } from "@/types/grid";
 import { getClubMetadata, getCountryMetadata, getAwardMetadata } from "@/lib/grid/constants";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const { data: session, isPending } = authClient.useSession();
@@ -37,7 +38,6 @@ export default function DashboardPage() {
     }
   }, [session, isPending, router]);
 
-  // Fetch grid on mount
   useEffect(() => {
     if (session?.user) {
       fetchGrid();
@@ -49,7 +49,7 @@ export default function DashboardPage() {
       setLoading(true);
       setNoGridAvailable(false);
       const response = await fetch("/api/grid/current");
-      
+
       if (response.status === 404) {
         setNoGridAvailable(true);
         return;
@@ -61,9 +61,16 @@ export default function DashboardPage() {
 
       const data = await response.json();
       setGrid(data.grid);
-      
+
       if (data.userSubmission) {
         setExistingSubmission(data.userSubmission);
+
+        // ✅ Populate submissionResult from existing submission so "View Results" works
+        setSubmissionResult({
+          score: data.userSubmission.score,
+          answers: data.userSubmission.answers,
+        });
+
         // Populate grid with submitted answers
         const answers: Record<string, string> = {};
         data.userSubmission.answers.forEach((answer: CellAnswer) => {
@@ -177,7 +184,6 @@ export default function DashboardPage() {
     return null;
   }
 
-  // No Grid Available State
   if (noGridAvailable) {
     return (
       <div className="min-h-screen bg-[#050505] text-white font-sans flex overflow-hidden">
@@ -199,9 +205,7 @@ export default function DashboardPage() {
               <p className="text-gray-400 text-sm mt-1">{session.user.email}</p>
             </div>
           </div>
-
           <div className="flex-1"></div>
-
           <button
             onClick={handleSignOut}
             className="flex items-center justify-center gap-2 w-full h-12 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-full transition-colors border border-white/10"
@@ -215,7 +219,6 @@ export default function DashboardPage() {
 
         <section className="flex-1 flex flex-col h-screen bg-[#050505] relative overflow-y-auto">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-[#36e27b]/5 blur-[120px] rounded-full pointer-events-none z-0"></div>
-
           <div className="relative z-10 flex flex-col items-center justify-center min-h-full py-8 px-4">
             <div className="text-center max-w-md">
               <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-[#36e27b]/10 mb-6">
@@ -223,15 +226,8 @@ export default function DashboardPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-
-              <h1 className="text-3xl font-extrabold text-white mb-4">
-                No Grid Available Today
-              </h1>
-              
-              <p className="text-gray-400 mb-8">
-                Today&apos;s grid hasn&apos;t been created yet. Check back soon for a new challenge!
-              </p>
-
+              <h1 className="text-3xl font-extrabold text-white mb-4">No Grid Available Today</h1>
+              <p className="text-gray-400 mb-8">Today&apos;s grid hasn&apos;t been created yet. Check back soon for a new challenge!</p>
               <button
                 onClick={fetchGrid}
                 className="px-6 py-3 bg-[#36e27b] hover:bg-[#2dd670] text-black font-bold rounded-full transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(54,226,123,0.3)]"
@@ -245,11 +241,8 @@ export default function DashboardPage() {
     );
   }
 
-  if (!grid) {
-    return null;
-  }
+  if (!grid) return null;
 
-  // Get unique row and column criteria
   const rowCriteria = [0, 1, 2].map((row) => {
     const cell = grid.cells.find((c) => c.row === row);
     return cell ? { type: cell.rowType, value: cell.rowValue } : null;
@@ -333,11 +326,12 @@ export default function DashboardPage() {
               <div className="col-span-1"></div>
               {colCriteria.map((criteria, idx) => {
                 if (!criteria) return null;
-                const icon = criteria.type === "club" 
-                  ? getClubMetadata(criteria.value as never).icon
-                  : criteria.type === "country"
-                  ? getCountryMetadata(criteria.value as never).flag
-                  : getAwardMetadata(criteria.value as never).icon;
+                const icon =
+                  criteria.type === "club"
+                    ? getClubMetadata(criteria.value as never).icon
+                    : criteria.type === "country"
+                    ? getCountryMetadata(criteria.value as never).flag
+                    : getAwardMetadata(criteria.value as never).icon;
 
                 return (
                   <div key={idx} className="flex flex-col items-center justify-center bg-[#121212] p-2 rounded-lg border border-white/10 aspect-[4/3]">
@@ -356,9 +350,10 @@ export default function DashboardPage() {
                 const rowCrit = rowCriteria[rowIndex];
                 if (!rowCrit) return null;
 
-                const rowIcon = rowCrit.type === "club"
-                  ? getClubMetadata(rowCrit.value as never).icon
-                  : getAwardMetadata(rowCrit.value as never).icon;
+                const rowIcon =
+                  rowCrit.type === "club"
+                    ? getClubMetadata(rowCrit.value as never).icon
+                    : getAwardMetadata(rowCrit.value as never).icon;
 
                 return (
                   <div key={rowIndex} className="grid grid-cols-4 gap-2 h-28">
@@ -387,9 +382,7 @@ export default function DashboardPage() {
                             <span className="text-xs font-bold text-white px-2 py-0.5 rounded-full backdrop-blur-sm">
                               {answer.playerName}
                             </span>
-                            <div className={`absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center ${
-                              answer.isCorrect ? "bg-[#36e27b]" : "bg-red-500"
-                            }`}>
+                            <div className={`absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center ${answer.isCorrect ? "bg-[#36e27b]" : "bg-red-500"}`}>
                               {answer.isCorrect ? (
                                 <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -444,21 +437,25 @@ export default function DashboardPage() {
                   <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </button>
-              <p className="text-xs text-gray-400">
-                {Object.keys(gridState).length}/9 cells filled
-              </p>
+              <p className="text-xs text-gray-400">{Object.keys(gridState).length}/9 cells filled</p>
             </div>
           )}
 
           {existingSubmission && (
-            <div className="mt-8 text-center">
-              <p className="text-gray-400 mb-4">You&apos;ve already submitted today&apos;s grid!</p>
+            <div className="mt-8 text-center flex items-center gap-4 justify-center">
+              <p className="text-gray-400">You&apos;ve already submitted today&apos;s grid!</p>
               <button
                 onClick={() => setShowResults(true)}
-                className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-full transition-colors border border-white/10"
+                className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-full transition-colors border border-white/10 cursor-pointer"
               >
                 View Results
               </button>
+              <Link
+                href="/"
+                className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-full transition-colors border border-white/10"
+              >
+                Go Back
+              </Link>
             </div>
           )}
         </div>

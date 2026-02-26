@@ -1,6 +1,7 @@
 "use client";
 
 import type { CellAnswer } from "@/types/grid";
+import Link from "next/link";
 
 interface ResultsModalProps {
   isOpen: boolean;
@@ -93,13 +94,13 @@ export default function ResultsModal({
                     )}
                   </div>
                 </div>
-                
+
                 {/* Reasoning/Explanation */}
                 {answer.llmReasoning && (
                   <div className="px-3 pb-3">
                     <div className={`text-sm p-3 rounded-lg ${
-                      answer.isCorrect 
-                        ? "bg-green-900/30 text-green-100" 
+                      answer.isCorrect
+                        ? "bg-green-900/30 text-green-100"
                         : "bg-red-900/30 text-red-100"
                     }`}>
                       <div className="flex items-start gap-2">
@@ -109,8 +110,8 @@ export default function ResultsModal({
                         <p className="leading-relaxed">{answer.llmReasoning}</p>
                       </div>
                     </div>
-                    
-                    {/* Suggested Answer - Show when wrong and suggestion exists */}
+
+                    {/* Suggested Answer */}
                     {!answer.isCorrect && answer.suggestedAnswer && (
                       <div className="mt-2 p-3 rounded-lg bg-blue-900/30 border border-blue-500/30">
                         <div className="flex items-start gap-2">
@@ -124,9 +125,9 @@ export default function ResultsModal({
                         </div>
                       </div>
                     )}
-                    
+
                     {/* Impossible Combination Notice */}
-                    {!answer.isCorrect && !answer.suggestedAnswer && answer.llmReasoning?.toLowerCase().includes('impossible') && (
+                    {!answer.isCorrect && !answer.suggestedAnswer && answer.llmReasoning?.toLowerCase().includes("impossible") && (
                       <div className="mt-2 p-3 rounded-lg bg-yellow-900/30 border border-yellow-500/30">
                         <div className="flex items-start gap-2">
                           <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -146,13 +147,23 @@ export default function ResultsModal({
           </div>
         </div>
 
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="w-full h-12 bg-[#36e27b] hover:bg-[#2dd670] text-black font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(54,226,123,0.3)]"
-        >
-          Close
-        </button>
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-3">
+          <Link
+            href="/leaderboard"
+            className="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#36e27b]/40 text-white font-semibold rounded-lg transition-all flex items-center justify-center gap-2"
+          >
+            <span>🏆</span>
+            View Leaderboard
+          </Link>
+
+          <button
+            onClick={onClose}
+            className="w-full h-12 bg-[#36e27b] hover:bg-[#2dd670] text-black font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(54,226,123,0.3)]"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );

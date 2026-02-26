@@ -10,7 +10,7 @@ export default function Navbar() {
   const handleGoogleSignIn = async () => {
     await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/dashboard",
+      callbackURL: "/",
     });
   };
 
@@ -26,42 +26,38 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-8">
-          <a
-            href="#how-to-play"
-            className="text-gray-300 hover:text-white transition"
-          >
-            How to Play
-          </a>
-          <a
-            href="#leaderboard"
-            className="text-gray-300 hover:text-white transition"
-          >
-            Leaderboard
-          </a>
-
+        <div className="flex items-center gap-6">
           {session?.user ? (
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-3 bg-gray-800/50 border border-gray-700 rounded-full px-4 py-2 hover:border-[#00ff88] transition"
-            >
-              {session.user.image && (
-                <Image
-                  src={session.user.image}
-                  alt={session.user.name || "User"}
-                  width={40}
-                  height={40}
-                  className="w-8 h-8 rounded-full border-2 border-[#00ff88]"
-                />
-              )}
-              <span className="text-white font-medium">{session.user.name}</span>
-            </Link>
+            <>
+              <Link
+                href="/leaderboard"
+                className="flex items-center gap-2 text-gray-300 hover:text-[#00ff88] transition-colors text-sm font-medium"
+              >
+                <span>🏆</span>
+                <span>Leaderboard</span>
+              </Link>
+
+              <Link
+                href="/"
+                className="flex items-center gap-3 bg-gray-800/50 border border-gray-700 rounded-full px-4 py-2 hover:border-[#00ff88] transition"
+              >
+                {session.user.image && (
+                  <Image
+                    src={session.user.image}
+                    alt={session.user.name || "User"}
+                    width={40}
+                    height={40}
+                    className="w-8 h-8 rounded-full border-2 border-[#00ff88]"
+                  />
+                )}
+                <span className="text-white font-medium">{session.user.name}</span>
+              </Link>
+            </>
           ) : (
             <button
               onClick={handleGoogleSignIn}
               className="flex items-center gap-2 bg-white hover:bg-gray-100 text-black px-4 py-2 rounded-lg transition font-medium cursor-pointer"
             >
-              {/* <span>🔐</span> */}
               <span>Sign in with Google</span>
             </button>
           )}

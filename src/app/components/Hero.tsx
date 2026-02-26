@@ -1,7 +1,20 @@
+"use client";
+
 import Navbar from './Navbar';
 import GridPreview from './GridPreview';
+import { authClient } from "@/lib/auth-client";
+import Link from "next/link";
 
 export default function Hero() {
+  const { data: session } = authClient.useSession();
+
+  const handleGoogleSignIn = async () => {
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/",
+    });
+  };
+
   return (
     <section className="relative min-h-screen pb-20">
       <Navbar />
@@ -27,11 +40,37 @@ export default function Hero() {
             </p>
             
             <div className="flex items-center gap-4">
-              <button className="bg-[#00ff88] hover:bg-[#00dd77] text-black font-bold px-8 py-4 rounded-full flex items-center gap-2 transition transform hover:scale-105">
-                <span>▶</span>
-                <span>Play Today&apos;s Grid</span>
-              </button>
-              <span className="text-gray-500">New challenge in <span className="text-[#00ff88]">04:23:12</span></span>
+              {session?.user ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    className="bg-[#00ff88] hover:bg-[#00dd77] text-black font-bold px-8 py-4 rounded-full flex items-center gap-2 transition transform hover:scale-105"
+                  >
+                    <span>▶</span>
+                    <span>Play Today&apos;s Grid</span>
+                  </Link>
+                  <Link
+                    href="/leaderboard"
+                    className="text-gray-300 hover:text-[#00ff88] transition flex items-center gap-2 font-medium"
+                  >
+                    <span>🏆</span>
+                    <span>View Leaderboard</span>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={handleGoogleSignIn}
+                    className="bg-[#00ff88] hover:bg-[#00dd77] text-black font-bold px-8 py-4 rounded-full flex items-center gap-2 transition transform hover:scale-105"
+                  >
+                    <span>▶</span>
+                    <span>Play Today&apos;s Grid</span>
+                  </button>
+                  <span className="text-gray-500">
+                    New challenge in <span className="text-[#00ff88]">04:23:12</span>
+                  </span>
+                </>
+              )}
             </div>
           </div>
           

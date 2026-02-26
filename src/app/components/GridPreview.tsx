@@ -64,7 +64,7 @@ export default function GridPreview() {
         
         {/* Score Footer */}
         <div className="flex justify-between items-center mt-6 text-sm">
-          <span className="text-green-500">Rarity: <span className="font-bold">324</span></span>
+          {/* <span className="text-green-500">Rarity: <span className="font-bold">324</span></span> */}
           <span className="text-gray-400">Score: <span className="font-bold text-white">8/9</span></span>
         </div>
       </div>

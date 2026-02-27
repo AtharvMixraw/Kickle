@@ -25,7 +25,7 @@ export default function Hero() {
           <div>
             <div className="inline-flex items-center gap-2 bg-green-900/30 border border-green-500/30 px-4 py-2 rounded-full mb-6">
               <span className="w-2 h-2 bg-[#00ff88] rounded-full animate-pulse"></span>
-              <span className="text-[#00ff88] text-sm font-medium">LIVE CHALLENGE #142</span>
+              <span className="text-[#00ff88] text-sm font-medium">LIVE CHALLENGE</span>
             </div>
             
             <h1 className="text-6xl font-bold mb-4">

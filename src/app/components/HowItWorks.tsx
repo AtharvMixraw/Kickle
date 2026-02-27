@@ -18,7 +18,7 @@ export default function HowItWorks() {
       {
         number: '04',
         title: 'Rank Up',
-        description: 'Submit your grid, check your rarity score, and see your rank.'
+        description: 'Submit your grid and see your rank.'
       }
     ];
   

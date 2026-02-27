@@ -106,7 +106,7 @@ export default function CTA() {
           </div>
           
           <div className="border-t border-gray-800 pt-8 flex justify-between items-center">
-            <p className="text-gray-500 text-sm">© 2024 Football Grid Challenge. All rights reserved.</p>
+            <p className="text-gray-500 text-sm">© 2026 Football Grid Challenge. All rights reserved.</p>
             <div className="flex gap-6">
               <a href="#" className="text-gray-400 hover:text-white transition">Twitter/X</a>
               <a href="#" className="text-gray-400 hover:text-white transition">Instagram</a>

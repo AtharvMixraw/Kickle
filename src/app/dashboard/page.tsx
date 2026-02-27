@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import PlayerInputModal from "../components/PlayerInputModal";
+import LoadingScreen from "../components/LoadingScreen";
 import ResultsModal from "../components/ResultsModal";
 import type { Grid, GridCell, CellAnswer, GridSubmission } from "@/types/grid";
 import { getClubMetadata, getCountryMetadata, getAwardMetadata } from "@/lib/grid/constants";
@@ -253,6 +254,10 @@ export default function DashboardPage() {
     return cell ? { type: cell.colType, value: cell.colValue } : null;
   });
 
+  if (submitting) {
+    return <LoadingScreen />;
+  }
+
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans flex overflow-hidden">
       {/* Left Sidebar */}
@@ -432,7 +437,7 @@ export default function DashboardPage() {
                 disabled={submitting || Object.keys(gridState).length !== 9}
                 className="w-full h-14 bg-[#36e27b] hover:bg-[#2dd670] text-black text-lg font-bold rounded-full shadow-[0_0_20px_rgba(54,226,123,0.3)] transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {submitting ? "Submitting..." : "Submit Grid"}
+                Submit Grid
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
@@ -473,12 +478,14 @@ export default function DashboardPage() {
         />
       )}
 
+      {/* ✅ Only gate on showResults — submissionResult is always populated now */}
       {showResults && submissionResult && (
         <ResultsModal
           isOpen={showResults}
           onClose={() => setShowResults(false)}
           score={submissionResult.score}
           answers={submissionResult.answers}
+          gridNumber={grid.gridNumber}
         />
       )}
     </div>

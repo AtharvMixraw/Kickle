@@ -2,12 +2,42 @@
 
 import type { CellAnswer } from "@/types/grid";
 import Link from "next/link";
+import { useState } from "react";
+
+// 🔁 Replace with your real domain once hosted
+const SITE_URL = "footballgrid.vercel.app";
 
 interface ResultsModalProps {
   isOpen: boolean;
   onClose: () => void;
   score: number;
   answers: CellAnswer[];
+  gridNumber: number;
+  timeTakenSeconds?: number | null;
+}
+
+function buildShareText(score: number, answers: CellAnswer[], gridNumber: number): string {
+  // Build 3x3 emoji grid row by row (answers are ordered row 0-2, col 0-2)
+  const rows = [0, 1, 2].map((row) =>
+    [0, 1, 2].map((col) => (answers[row * 3 + col]?.isCorrect ? "🟩" : "🟥")).join("")
+  );
+
+  return [
+    `⚽ Football Grid #${gridNumber}`,
+    ``,
+    rows[0],
+    rows[1],
+    rows[2],
+    ``,
+    `${score}/9 — Can you beat me?`,
+    `${SITE_URL}`,
+  ].join("\n");
+}
+
+function formatTime(secs: number): string {
+  const m = Math.floor(secs / 60).toString().padStart(2, "0");
+  const s = (secs % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
 }
 
 export default function ResultsModal({
@@ -15,11 +45,45 @@ export default function ResultsModal({
   onClose,
   score,
   answers,
+  gridNumber,
+  timeTakenSeconds,
 }: ResultsModalProps) {
+  const [copied, setCopied] = useState(false);
+
   if (!isOpen) return null;
 
   const correctAnswers = answers.filter((a) => a.isCorrect).length;
   const percentage = Math.round((correctAnswers / 9) * 100);
+
+  const handleShare = async () => {
+    const text = buildShareText(score, answers, gridNumber);
+
+    // Use native share sheet on mobile, fall back to clipboard on desktop
+    if (navigator.share) {
+      try {
+        await navigator.share({ text });
+        return;
+      } catch {
+        // User cancelled native share — fall through to clipboard
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Fallback for localhost / non-HTTPS environments
+      const el = document.createElement("textarea");
+      el.value = text;
+      el.style.position = "fixed";
+      el.style.opacity = "0";
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
@@ -34,12 +98,10 @@ export default function ResultsModal({
           <h2 className="text-3xl font-extrabold text-white mb-2">
             {percentage >= 80 ? "Amazing!" : percentage >= 60 ? "Great Job!" : percentage >= 40 ? "Not Bad!" : "Keep Practicing!"}
           </h2>
-          <p className="text-gray-400">
-            You got {correctAnswers} out of 9 correct
-          </p>
+          <p className="text-gray-400">You got {correctAnswers} out of 9 correct</p>
         </div>
 
-        {/* Score Display */}
+        {/* Score */}
         <div className="bg-[#1a1a1a] rounded-xl p-6 mb-6 border border-white/5">
           <div className="flex items-center justify-between mb-4">
             <span className="text-gray-400 font-medium">Your Score</span>
@@ -49,9 +111,35 @@ export default function ResultsModal({
             <div
               className="h-full bg-gradient-to-r from-[#36e27b] to-[#2dd670] transition-all duration-1000 ease-out"
               style={{ width: `${percentage}%` }}
-            ></div>
+            />
           </div>
         </div>
+
+        {/* Share Button — above answers, hard to miss */}
+        <button
+          onClick={handleShare}
+          className={`w-full h-12 mb-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all border ${
+            copied
+              ? "bg-[#36e27b]/10 border-[#36e27b]/40 text-[#36e27b]"
+              : "bg-white/5 hover:bg-white/10 border-white/10 hover:border-white/20 text-white"
+          }`}
+        >
+          {copied ? (
+            <>
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              Copied to clipboard!
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+              Share your result
+            </>
+          )}
+        </button>
 
         {/* Answer Details */}
         <div className="mb-6">
@@ -68,21 +156,14 @@ export default function ResultsModal({
                     : "bg-red-900/20 border-red-500/30"
                 }`}
               >
-                {/* Answer Header */}
                 <div className="flex items-center justify-between p-3">
                   <div className="flex items-center gap-3 flex-1">
-                    <span className={`font-bold text-sm ${
-                      answer.isCorrect ? "text-[#36e27b]" : "text-red-400"
-                    }`}>
+                    <span className={`font-bold text-sm ${answer.isCorrect ? "text-[#36e27b]" : "text-red-400"}`}>
                       Cell {idx + 1}
                     </span>
-                    <span className="text-white font-medium truncate">
-                      {answer.playerName}
-                    </span>
+                    <span className="text-white font-medium truncate">{answer.playerName}</span>
                   </div>
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    answer.isCorrect ? "bg-[#36e27b]" : "bg-red-500"
-                  }`}>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${answer.isCorrect ? "bg-[#36e27b]" : "bg-red-500"}`}>
                     {answer.isCorrect ? (
                       <svg className="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -95,14 +176,9 @@ export default function ResultsModal({
                   </div>
                 </div>
 
-                {/* Reasoning/Explanation */}
                 {answer.llmReasoning && (
                   <div className="px-3 pb-3">
-                    <div className={`text-sm p-3 rounded-lg ${
-                      answer.isCorrect
-                        ? "bg-green-900/30 text-green-100"
-                        : "bg-red-900/30 text-red-100"
-                    }`}>
+                    <div className={`text-sm p-3 rounded-lg ${answer.isCorrect ? "bg-green-900/30 text-green-100" : "bg-red-900/30 text-red-100"}`}>
                       <div className="flex items-start gap-2">
                         <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -111,7 +187,6 @@ export default function ResultsModal({
                       </div>
                     </div>
 
-                    {/* Suggested Answer */}
                     {!answer.isCorrect && answer.suggestedAnswer && (
                       <div className="mt-2 p-3 rounded-lg bg-blue-900/30 border border-blue-500/30">
                         <div className="flex items-start gap-2">
@@ -126,7 +201,6 @@ export default function ResultsModal({
                       </div>
                     )}
 
-                    {/* Impossible Combination Notice */}
                     {!answer.isCorrect && !answer.suggestedAnswer && answer.llmReasoning?.toLowerCase().includes("impossible") && (
                       <div className="mt-2 p-3 rounded-lg bg-yellow-900/30 border border-yellow-500/30">
                         <div className="flex items-start gap-2">

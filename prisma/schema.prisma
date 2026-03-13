@@ -105,6 +105,7 @@ model GridSubmission {
   userId      String
   gridId      String
   score       Int // 0-9
+  timeTakenSeconds Int?
   submittedAt DateTime @default(now())
 
   user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)

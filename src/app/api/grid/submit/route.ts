@@ -6,22 +6,17 @@ import type { SubmitGridRequest } from "@/types/grid";
 
 export async function POST(request: NextRequest) {
   try {
-    // Get authenticated user
     const session = await auth.api.getSession({
       headers: request.headers,
     });
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body: SubmitGridRequest = await request.json();
-    const { gridId, answers } = body;
+    const body: SubmitGridRequest & { timeTakenSeconds?: number } = await request.json();
+    const { gridId, answers, timeTakenSeconds } = body;
 
-    // Validate input
     if (!gridId || !answers || answers.length !== 9) {
       return NextResponse.json(
         { error: "Invalid submission: must include gridId and 9 answers" },
@@ -29,22 +24,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if grid exists
     const grid = await prisma.grid.findUnique({
       where: { id: gridId },
-      include: {
-        cells: true,
-      },
+      include: { cells: true },
     });
 
     if (!grid) {
-      return NextResponse.json(
-        { error: "Grid not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Grid not found" }, { status: 404 });
     }
 
-    // Check if user already submitted for this grid
     const existingSubmission = await prisma.gridSubmission.findUnique({
       where: {
         userId_gridId: {
@@ -61,13 +49,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate each answer with OpenAI
     const evaluationPromises = answers.map(async (answer) => {
-      const cell = grid.cells.find((c: { id: string; }) => c.id === answer.cellId);
-      
-      if (!cell) {
-        throw new Error(`Cell not found: ${answer.cellId}`);
-      }
+      const cell = grid.cells.find((c: { id: string }) => c.id === answer.cellId);
+
+      if (!cell) throw new Error(`Cell not found: ${answer.cellId}`);
 
       const evaluation = await validatePlayerAnswer({
         playerName: answer.playerName,
@@ -82,30 +67,27 @@ export async function POST(request: NextRequest) {
         playerName: answer.playerName,
         isCorrect: evaluation.isCorrect,
         llmReasoning: evaluation.reasoning,
-        suggestedAnswer: evaluation.suggestedAnswer, // ✅ Add this line
+        suggestedAnswer: evaluation.suggestedAnswer,
       };
     });
 
     const evaluations = await Promise.all(evaluationPromises);
-
-    // Calculate score
     const score = evaluations.filter((e) => e.isCorrect).length;
 
-    // Create submission with all answers in a transaction
     const submission = await prisma.gridSubmission.create({
       data: {
         userId: session.user.id,
         gridId: grid.id,
         score,
+        // Only save if it's a reasonable value (< 2 hours)
+        timeTakenSeconds: timeTakenSeconds && timeTakenSeconds < 7200 ? timeTakenSeconds : null,
         answers: {
           create: evaluations,
         },
       },
       include: {
         answers: {
-          include: {
-            cell: true,
-          },
+          include: { cell: true },
         },
       },
     });
@@ -114,12 +96,10 @@ export async function POST(request: NextRequest) {
       submission,
       score,
       answers: submission.answers,
+      timeTakenSeconds: submission.timeTakenSeconds,
     });
   } catch (error) {
     console.error("Error submitting grid:", error);
-    return NextResponse.json(
-      { error: "Failed to submit grid" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to submit grid" }, { status: 500 });
   }
 }

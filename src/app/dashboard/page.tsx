@@ -2,7 +2,7 @@
 
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import PlayerInputModal from "../components/PlayerInputModal";
 import LoadingScreen from "../components/LoadingScreen";
@@ -21,6 +21,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [noGridAvailable, setNoGridAvailable] = useState(false);
+  const [timerSeconds, setTimerSeconds] = useState(0);
+  const [timerStarted, setTimerStarted] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Modal states
   const [editingCell, setEditingCell] = useState<{ row: number; col: number; cell: GridCell } | null>(null);
@@ -29,6 +32,7 @@ export default function DashboardPage() {
   const [submissionResult, setSubmissionResult] = useState<{
     score: number;
     answers: CellAnswer[];
+    timeTakenSeconds?: number | null;
   } | null>(null);
 
   // Existing submission
@@ -45,6 +49,11 @@ export default function DashboardPage() {
       fetchGrid();
     }
   }, [session]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, []);
 
   const fetchGrid = async () => {
     try {
@@ -71,6 +80,7 @@ export default function DashboardPage() {
         setSubmissionResult({
           score: data.userSubmission.score,
           answers: data.userSubmission.answers,
+          timeTakenSeconds: data.userSubmission.timeTakenSeconds ?? null,
         });
 
         // Populate grid with submitted answers
@@ -96,9 +106,25 @@ export default function DashboardPage() {
     router.push("/");
   };
 
+  const startTimer = () => {
+    if (timerStarted) return;
+    setTimerStarted(true);
+    timerRef.current = setInterval(() => setTimerSeconds((s) => s + 1), 1000);
+  };
+
+  const stopTimer = () => {
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+  };
+
+  const formatTime = (secs: number): string => {
+    const m = Math.floor(secs / 60).toString().padStart(2, "0");
+    const s = (secs % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
   const handleCellClick = (row: number, col: number) => {
     if (existingSubmission) return;
-
+    startTimer();
     const cell = grid?.cells.find((c) => c.row === row && c.col === col);
     if (cell) {
       setEditingCell({ row, col, cell });
@@ -133,6 +159,7 @@ export default function DashboardPage() {
     if (!grid || existingSubmission) return;
 
     try {
+      stopTimer();
       setSubmitting(true);
 
       const answers = grid.cells.map((cell) => ({
@@ -146,6 +173,7 @@ export default function DashboardPage() {
         body: JSON.stringify({
           gridId: grid.id,
           answers,
+          timeTakenSeconds: timerSeconds,
         }),
       });
 
@@ -155,7 +183,11 @@ export default function DashboardPage() {
       }
 
       const result = await response.json();
-      setSubmissionResult(result);
+      setSubmissionResult({
+        score: result.score,
+        answers: result.answers,
+        timeTakenSeconds: result.timeTakenSeconds ?? timerSeconds,
+      });
       setExistingSubmission(result.submission);
       setShowResults(true);
     } catch (error) {
@@ -332,6 +364,21 @@ export default function DashboardPage() {
             <h1 className="text-4xl font-extrabold text-white tracking-tight mb-4">
               Football Grid Challenge
             </h1>
+
+            {/* Live timer — only shows while playing */}
+            {!existingSubmission && (
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+                <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className={`text-sm font-mono font-bold tabular-nums ${timerStarted ? "text-[#36e27b]" : "text-gray-500"}`}>
+                  {timerStarted ? formatTime(timerSeconds) : "00:00"}
+                </span>
+                {!timerStarted && (
+                  <span className="text-gray-600 text-xs">starts on first click</span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Grid */}
@@ -532,6 +579,7 @@ export default function DashboardPage() {
           score={submissionResult.score}
           answers={submissionResult.answers}
           gridNumber={grid.gridNumber}
+          timeTakenSeconds={submissionResult.timeTakenSeconds}
         />
       )}
     </div>

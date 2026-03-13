@@ -25,6 +25,7 @@ export default function DashboardPage() {
   // Modal states
   const [editingCell, setEditingCell] = useState<{ row: number; col: number; cell: GridCell } | null>(null);
   const [showResults, setShowResults] = useState(false);
+  const [showPartialWarning, setShowPartialWarning] = useState(false);
   const [submissionResult, setSubmissionResult] = useState<{
     score: number;
     answers: CellAnswer[];
@@ -113,14 +114,23 @@ export default function DashboardPage() {
     }
   };
 
-  const handleSubmitGrid = async () => {
-    if (!grid || existingSubmission) return;
+  // Called from the partial warning modal to bypass the count check
+  const submitAnyway = async () => {
+    setShowPartialWarning(false);
+    await doSubmit();
+  };
 
+  const handleSubmitGrid = async () => {
     const filledCells = Object.keys(gridState).length;
-    if (filledCells !== 9) {
-      alert("Please fill all 9 cells before submitting!");
+    if (filledCells < 9) {
+      setShowPartialWarning(true);
       return;
     }
+    await doSubmit();
+  };
+
+  const doSubmit = async () => {
+    if (!grid || existingSubmission) return;
 
     try {
       setSubmitting(true);
@@ -434,7 +444,7 @@ export default function DashboardPage() {
             <div className="mt-8 flex flex-col items-center gap-4 w-full max-w-sm">
               <button
                 onClick={handleSubmitGrid}
-                disabled={submitting || Object.keys(gridState).length !== 9}
+                disabled={submitting || Object.keys(gridState).length === 0}
                 className="w-full h-14 bg-[#36e27b] hover:bg-[#2dd670] text-black text-lg font-bold rounded-full shadow-[0_0_20px_rgba(54,226,123,0.3)] transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Submit Grid
@@ -478,6 +488,42 @@ export default function DashboardPage() {
         />
       )}
 
+
+      {/* Partial submission warning */}
+      {showPartialWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
+          <div className="bg-[#121212] rounded-2xl border border-yellow-500/30 p-6 w-full max-w-sm shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-base">Not all cells filled</h3>
+                <p className="text-gray-400 text-sm">You&apos;ve only filled {Object.keys(gridState).length}/9 cells.</p>
+              </div>
+            </div>
+            <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+              Empty cells will be marked as incorrect. Was this a mistake, or do you want to submit anyway?
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={submitAnyway}
+                className="w-full h-11 bg-[#36e27b] hover:bg-[#2dd670] text-black font-bold rounded-xl transition-all text-sm"
+              >
+                Submit anyway
+              </button>
+              <button
+                onClick={() => setShowPartialWarning(false)}
+                className="w-full h-11 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl transition-colors border border-white/10 text-sm"
+              >
+                Go back and fill more
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* ✅ Only gate on showResults — submissionResult is always populated now */}
       {showResults && submissionResult && (
         <ResultsModal

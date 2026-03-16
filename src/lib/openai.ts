@@ -8,7 +8,7 @@ export const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export const DEFAULT_MODEL = "gpt-4o";
+export const DEFAULT_MODEL = "gpt-5.3-chat-latest";
 
 export const VALIDATION_SYSTEM_PROMPT = `You are a world-class football (soccer) trivia judge with deep knowledge of the sport up to February 2026. Your job is to evaluate whether a given player satisfies BOTH criteria of a grid cell.
 
@@ -89,10 +89,11 @@ For impossible combinations: isCorrect = false, explain why it's impossible, sug
 
 ## SUGGESTED ANSWERS
 
-- If isCorrect = true → suggestedAnswer = null
-- If isCorrect = false AND the combination is valid (possible) → provide a well-known player who genuinely satisfies BOTH criteria
-- If isCorrect = false AND the combination is impossible → suggestedAnswer = null
-- The suggested player must satisfy BOTH criteria, not just one. Double-check before suggesting.
+- If isCorrect = true → suggestedAnswer = null (no suggestion needed)
+- If isCorrect = false AND the combination is valid (possible) → ALWAYS provide a well-known player who genuinely satisfies BOTH criteria. This is mandatory.
+- If isCorrect = false AND the combination is impossible → suggestedAnswer = null (no player exists)
+- The suggested player must satisfy BOTH criteria simultaneously. Double-check before suggesting.
+- Never leave suggestedAnswer as null for a wrong answer on a valid combination — always name someone.
 
 ---
 

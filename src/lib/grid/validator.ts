@@ -39,7 +39,7 @@ export async function validatePlayerAnswer(
           content: userPrompt,
         },
       ],
-      temperature: 0.1, // Low temperature for consistency
+      // temperature: 0.1, // Low temperature for consistency
       response_format: { type: "json_object" },
     });
 

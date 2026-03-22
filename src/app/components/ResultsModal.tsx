@@ -101,11 +101,19 @@ export default function ResultsModal({
           <p className="text-gray-400">You got {correctAnswers} out of 9 correct</p>
         </div>
 
-        {/* Score */}
+        {/* Score + Time */}
         <div className="bg-[#1a1a1a] rounded-xl p-6 mb-6 border border-white/5">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-gray-400 font-medium">Your Score</span>
-            <span className="text-4xl font-bold text-[#36e27b]">{score}/9</span>
+          <div className="flex items-center gap-6 mb-4">
+            <div>
+              <p className="text-gray-400 text-xs font-medium mb-1">Score</p>
+              <span className="text-4xl font-bold text-[#36e27b]">{score}/9</span>
+            </div>
+            {timeTakenSeconds != null && (
+              <div className="border-l border-white/10 pl-6">
+                <p className="text-gray-400 text-xs font-medium mb-1">Time taken</p>
+                <span className="text-4xl font-bold text-white font-mono">{formatTime(timeTakenSeconds)}</span>
+              </div>
+            )}
           </div>
           <div className="w-full bg-[#2a2a2a] rounded-full h-3 overflow-hidden">
             <div

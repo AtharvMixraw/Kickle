@@ -89,6 +89,7 @@ model GridCell {
   // Row criteria (2 clubs + 1 award)
   rowType  String // "club" or "award"
   rowValue String // "Real Madrid", "UCL", etc.
+  sampleAnswer String?
 
   // Column criteria (2 countries + 1 award)
   colType  String // "country" or "award"

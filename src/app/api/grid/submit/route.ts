@@ -4,11 +4,13 @@ import { auth } from "@/lib/auth";
 import { validatePlayerAnswer } from "@/lib/grid/validator";
 import type { SubmitGridRequest } from "@/types/grid";
 
+function normalise(s: string) {
+  return s.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const session = await auth.api.getSession({ headers: request.headers });
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -34,12 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     const existingSubmission = await prisma.gridSubmission.findUnique({
-      where: {
-        userId_gridId: {
-          userId: session.user.id,
-          gridId: grid.id,
-        },
-      },
+      where: { userId_gridId: { userId: session.user.id, gridId: grid.id } },
     });
 
     if (existingSubmission) {
@@ -50,12 +47,37 @@ export async function POST(request: NextRequest) {
     }
 
     const evaluationPromises = answers.map(async (answer) => {
-      const cell = grid.cells.find((c: { id: string }) => c.id === answer.cellId);
-
+      const cell = grid.cells.find((c) => c.id === answer.cellId);
       if (!cell) throw new Error(`Cell not found: ${answer.cellId}`);
 
+      const playerName = answer.playerName?.trim() || "";
+      const sample = (cell as any).sampleAnswer as string | null;
+
+      // Fast path 1 — empty answer
+      if (!playerName) {
+        return {
+          cellId: answer.cellId,
+          playerName: "",
+          isCorrect: false,
+          llmReasoning: "No answer provided.",
+          suggestedAnswer: sample || null,
+        };
+      }
+
+      // Fast path 2 — matches sample answer exactly (case-insensitive)
+      if (sample && normalise(playerName) === normalise(sample)) {
+        return {
+          cellId: answer.cellId,
+          playerName,
+          isCorrect: true,
+          llmReasoning: `✓ Correct! ${playerName} satisfies both criteria.`,
+          suggestedAnswer: null,
+        };
+      }
+
+      // Slow path — call LLM for unknown answers
       const evaluation = await validatePlayerAnswer({
-        playerName: answer.playerName,
+        playerName,
         rowType: cell.rowType,
         rowValue: cell.rowValue,
         colType: cell.colType,
@@ -64,10 +86,11 @@ export async function POST(request: NextRequest) {
 
       return {
         cellId: answer.cellId,
-        playerName: answer.playerName,
+        playerName,
         isCorrect: evaluation.isCorrect,
         llmReasoning: evaluation.reasoning,
-        suggestedAnswer: evaluation.suggestedAnswer,
+        // If LLM says wrong and we have a sample, hint at it
+        suggestedAnswer: evaluation.suggestedAnswer ?? sample ?? null,
       };
     });
 
@@ -79,16 +102,12 @@ export async function POST(request: NextRequest) {
         userId: session.user.id,
         gridId: grid.id,
         score,
-        // Only save if it's a reasonable value (< 2 hours)
-        timeTakenSeconds: timeTakenSeconds && timeTakenSeconds < 7200 ? timeTakenSeconds : null,
-        answers: {
-          create: evaluations,
-        },
+        timeTakenSeconds:
+          timeTakenSeconds && timeTakenSeconds < 7200 ? timeTakenSeconds : null,
+        answers: { create: evaluations },
       },
       include: {
-        answers: {
-          include: { cell: true },
-        },
+        answers: { include: { cell: true } },
       },
     });
 

@@ -60,6 +60,8 @@ export default function AdminPage() {
   const [existingGrids, setExistingGrids] = useState<ExistingGrid[]>([]);
   const [loadingGrids, setLoadingGrids] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [notifyingId, setNotifyingId] = useState<string | null>(null);
+  const [notifyResult, setNotifyResult] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState<"create" | "manage">("create");
 
   // Auth guard
@@ -154,6 +156,26 @@ export default function AdminPage() {
       fetchGrids();
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleNotify = async (gridId: string, gridNumber: number) => {
+    if (!confirm(`Send "Grid #${gridNumber} is live" email to all players?`)) return;
+    setNotifyingId(gridId);
+    try {
+      const res = await fetch("/api/admin/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gridNumber }),
+      });
+      const data = await res.json();
+      setNotifyResult((prev) => ({
+        ...prev,
+        [gridId]: data.message || data.error || "Done",
+      }));
+      setTimeout(() => setNotifyResult((prev) => { const n = { ...prev }; delete n[gridId]; return n; }), 4000);
+    } finally {
+      setNotifyingId(null);
     }
   };
 
@@ -355,7 +377,7 @@ export default function AdminPage() {
                 ))}
 
                 <p className="text-[11px] text-gray-600 mt-3 leading-relaxed">
-                  If a user's answer matches yours (case-insensitive), it skips the LLM entirely. Leave blank if unsure — LLM will still validate.
+                  If a user&apos;s answer matches yours (case-insensitive), it skips the LLM entirely. Leave blank if unsure — LLM will still validate.
                 </p>
               </div>
 
@@ -470,20 +492,47 @@ export default function AdminPage() {
                         </p>
                       </div>
 
-                      {/* Delete */}
-                      <button
-                        onClick={() => handleDelete(grid.id)}
-                        disabled={deletingId === grid.id}
-                        className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-red-400 transition-colors disabled:opacity-50 shrink-0"
-                      >
-                        {deletingId === grid.id ? (
-                          <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
+                      {/* Notify + Delete */}
+                      <div className="flex items-center gap-1 shrink-0">
+                        {/* Notify result badge */}
+                        {notifyResult[grid.id] && (
+                          <span className="text-xs text-[#36e27b] bg-[#36e27b]/10 px-2 py-1 rounded-lg border border-[#36e27b]/20 whitespace-nowrap">
+                            {notifyResult[grid.id]}
+                          </span>
                         )}
-                      </button>
+
+                        {/* Notify button */}
+                        <button
+                          onClick={() => handleNotify(grid.id, grid.gridNumber)}
+                          disabled={notifyingId === grid.id}
+                          title="Notify all players"
+                          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-[#36e27b] transition-colors disabled:opacity-50"
+                        >
+                          {notifyingId === grid.id ? (
+                            <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                          )}
+                        </button>
+
+                        {/* Delete button */}
+                        <button
+                          onClick={() => handleDelete(grid.id)}
+                          disabled={deletingId === grid.id}
+                          title="Delete grid"
+                          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-red-400 transition-colors disabled:opacity-50"
+                        >
+                          {deletingId === grid.id ? (
+                            <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   );
                 })}

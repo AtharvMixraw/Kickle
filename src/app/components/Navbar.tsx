@@ -24,7 +24,7 @@ export default function Navbar() {
           </div>
           <span className="text-white font-bold text-sm sm:text-base leading-tight">
             <span className="hidden sm:inline">Football Grid Challenge</span>
-            <span className="sm:hidden">FG Challenge</span>
+            <span className="sm:hidden">Kickle</span>
           </span>
         </Link>
 

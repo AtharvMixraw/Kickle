@@ -12,11 +12,13 @@
     "@libsql/client": "^0.15.15",
     "@prisma/adapter-libsql": "^7.2.0",
     "@prisma/client": "^5.22.0",
+    "@react-email/render": "^2.0.4",
     "better-auth": "^1.4.9",
     "next": "16.1.1",
     "openai": "^6.15.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "resend": "^6.9.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

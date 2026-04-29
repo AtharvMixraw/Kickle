@@ -28,7 +28,20 @@ export async function POST(request: NextRequest) {
 
     const grid = await prisma.grid.findUnique({
       where: { id: gridId },
-      include: { cells: true },
+      include: { 
+        cells: {
+          select: {
+            id: true,
+            row: true,
+            col: true,
+            rowType: true,
+            rowValue: true,
+            colType: true,
+            colValue: true,
+            sampleAnswer: true, 
+          }
+        },
+      },
     });
 
     if (!grid) {
@@ -51,7 +64,7 @@ export async function POST(request: NextRequest) {
       if (!cell) throw new Error(`Cell not found: ${answer.cellId}`);
 
       const playerName = answer.playerName?.trim() || "";
-      const sample = (cell as any).sampleAnswer as string | null;
+      const sample = cell.sampleAnswer;
 
       // Fast path 1 — empty answer
       if (!playerName) {
@@ -75,7 +88,6 @@ export async function POST(request: NextRequest) {
         };
       }
 
-      // Slow path — call LLM for unknown answers
       const evaluation = await validatePlayerAnswer({
         playerName,
         rowType: cell.rowType,
@@ -89,7 +101,6 @@ export async function POST(request: NextRequest) {
         playerName,
         isCorrect: evaluation.isCorrect,
         llmReasoning: evaluation.reasoning,
-        // If LLM says wrong and we have a sample, hint at it
         suggestedAnswer: evaluation.suggestedAnswer ?? sample ?? null,
       };
     });

@@ -87,6 +87,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ grids });
   } catch (error) {
+    console.error("Error fetching grids:", error);
     return NextResponse.json({ error: "Failed to fetch grids" }, { status: 500 });
   }
 }
@@ -110,6 +111,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error("Error deleting grid:", error);
     return NextResponse.json({ error: "Failed to delete grid" }, { status: 500 });
   }
 }

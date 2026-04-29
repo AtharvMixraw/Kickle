@@ -7,7 +7,7 @@ import Image from "next/image";
 import PlayerInputModal from "../components/PlayerInputModal";
 import LoadingScreen from "../components/LoadingScreen";
 import ResultsModal from "../components/ResultsModal";
-import type { Grid, GridCell, CellAnswer, GridSubmission } from "@/types/grid";
+import type { Grid, GridCell, CellAnswer, GridSubmission, RowCriteriaType, ColCriteriaType } from "@/types/grid";
 import { getClubMetadata, getCountryMetadata, getAwardMetadata } from "@/lib/grid/constants";
 import Link from "next/link";
 
@@ -76,7 +76,7 @@ export default function DashboardPage() {
       if (data.userSubmission) {
         setExistingSubmission(data.userSubmission);
 
-        // ✅ Populate submissionResult from existing submission so "View Results" works
+        // Populate submissionResult from existing submission so "View Results" works
         setSubmissionResult({
           score: data.userSubmission.score,
           answers: data.userSubmission.answers,
@@ -138,6 +138,26 @@ export default function DashboardPage() {
         [`${editingCell.row}-${editingCell.col}`]: playerName,
       });
     }
+  };
+
+  // Format row criteria (club or award)
+  const formatRowCriteria = (type: RowCriteriaType, value: string): string => {
+    if (type === "club") {
+      return getClubMetadata(value as never).name;
+    } else if (type === "award") {
+      return getAwardMetadata(value as never).description;
+    }
+    return value;
+  };
+
+  // Format column criteria (country or award)
+  const formatColCriteria = (type: ColCriteriaType, value: string): string => {
+    if (type === "country") {
+      return getCountryMetadata(value as never).name;
+    } else if (type === "award") {
+      return getAwardMetadata(value as never).description;
+    }
+    return value;
   };
 
   // Called from the partial warning modal to bypass the count check
@@ -202,17 +222,6 @@ export default function DashboardPage() {
     if (!existingSubmission) return undefined;
     const cell = grid?.cells.find((c) => c.row === row && c.col === col);
     return existingSubmission.answers.find((a) => a.cellId === cell?.id);
-  };
-
-  const formatCriteria = (type: string, value: string): string => {
-    if (type === "club") {
-      return getClubMetadata(value as never).name;
-    } else if (type === "country") {
-      return getCountryMetadata(value as never).name;
-    } else if (type === "award") {
-      return getAwardMetadata(value as never).description;
-    }
-    return value;
   };
 
   if (isPending || loading) {
@@ -389,9 +398,7 @@ export default function DashboardPage() {
               {colCriteria.map((criteria, idx) => {
                 if (!criteria) return null;
                 const icon =
-                  criteria.type === "club"
-                    ? getClubMetadata(criteria.value as never).icon
-                    : criteria.type === "country"
+                  criteria.type === "country"
                     ? getCountryMetadata(criteria.value as never).flag
                     : getAwardMetadata(criteria.value as never).icon;
 
@@ -530,11 +537,10 @@ export default function DashboardPage() {
           onClose={() => setEditingCell(null)}
           onSubmit={handlePlayerSubmit}
           currentValue={gridState[`${editingCell.row}-${editingCell.col}`]}
-          rowCriteria={formatCriteria(editingCell.cell.rowType, editingCell.cell.rowValue)}
-          colCriteria={formatCriteria(editingCell.cell.colType, editingCell.cell.colValue)}
+          rowCriteria={formatRowCriteria(editingCell.cell.rowType, editingCell.cell.rowValue as string)}
+          colCriteria={formatColCriteria(editingCell.cell.colType, editingCell.cell.colValue as string)}
         />
       )}
-
 
       {/* Partial submission warning */}
       {showPartialWarning && (
@@ -571,7 +577,8 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
-      {/* ✅ Only gate on showResults — submissionResult is always populated now */}
+      
+      {/* Results Modal */}
       {showResults && submissionResult && (
         <ResultsModal
           isOpen={showResults}

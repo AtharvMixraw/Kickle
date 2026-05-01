@@ -1,10 +1,11 @@
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -102,19 +103,21 @@ model GridCell {
 }
 
 model GridSubmission {
-  id          String   @id @default(cuid())
-  userId      String
-  gridId      String
-  score       Int // 0-9
+  id               String   @id @default(cuid())
+  userId           String
+  gridId           String?  // nullable so grid can be deleted without losing score
+  gridNumber       Int      // denormalized — survives grid deletion
+  gridDate         DateTime // denormalized — survives grid deletion
+  score            Int      // 0-9
   timeTakenSeconds Int?
-  submittedAt DateTime @default(now())
+  submittedAt      DateTime @default(now())
 
   user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  grid    Grid         @relation(fields: [gridId], references: [id], onDelete: Cascade)
+  grid    Grid?        @relation(fields: [gridId], references: [id], onDelete: SetNull)
   answers CellAnswer[]
 
-  // One attempt per user per grid
-  @@unique([userId, gridId])
+  // One attempt per user per grid day
+  @@unique([userId, gridNumber])
 }
 
 model CellAnswer {

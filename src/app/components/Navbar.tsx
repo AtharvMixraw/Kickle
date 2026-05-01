@@ -15,7 +15,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 w-full bg-[#0a1e1a] border-b border-gray-800 z-50">
+    <nav className="fixed top-0 w-full border-b border-white/10 bg-[#0a1e1a]/85 backdrop-blur-md z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
         {/* Logo — truncates gracefully on small screens */}
         <Link href="/" className="flex items-center gap-2 shrink-0">

@@ -239,9 +239,9 @@ export default function DashboardPage() {
   if (noGridAvailable) {
     return (
       <div className="min-h-screen bg-[#050505] text-white font-sans flex overflow-hidden">
-        <aside className="hidden lg:flex flex-col w-[280px] bg-[#121212] border-r border-white/5 h-screen p-6 gap-6 overflow-y-auto">
-          <div className="flex flex-col items-center gap-4 py-4">
-            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#36e27b] p-1">
+        <aside className="hidden lg:flex flex-col w-[280px] bg-gradient-to-b from-[#121212] to-[#0f0f0f] border-r border-white/10 h-screen p-6 gap-6 overflow-y-auto">
+          <div className="flex flex-col items-center gap-4 py-4 rounded-2xl bg-white/[0.02] p-4 backdrop-blur-sm">
+            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#36e27b] p-1 bg-[#1a1a1a]">
               {session.user.image && (
                 <Image
                   src={session.user.image}
@@ -253,16 +253,18 @@ export default function DashboardPage() {
               )}
             </div>
             <div className="text-center">
-              <h2 className="text-xl font-bold text-white">{session.user.name || "Player"}</h2>
-              <p className="text-gray-400 text-sm mt-1">{session.user.email}</p>
+              <h2 className="text-lg font-bold text-white">{session.user.name || "Player"}</h2>
+              <p className="text-gray-500 text-xs mt-1.5">{session.user.email}</p>
             </div>
           </div>
+
           <div className="flex-1"></div>
+
           <button
             onClick={handleSignOut}
-            className="flex items-center justify-center gap-2 w-full h-12 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-full transition-colors border border-white/10"
+            className="flex items-center justify-center gap-2 w-full h-11 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl transition-all border border-white/10 hover:border-white/20 text-sm"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
             Sign Out
@@ -270,19 +272,20 @@ export default function DashboardPage() {
         </aside>
 
         <section className="flex-1 flex flex-col h-screen bg-[#050505] relative overflow-y-auto">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-[#36e27b]/5 blur-[120px] rounded-full pointer-events-none z-0"></div>
-          <div className="relative z-10 flex flex-col items-center justify-center min-h-full py-8 px-4">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#0f3d31_0%,transparent_50%)] pointer-events-none z-0"></div>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-[#36e27b]/4 blur-[120px] rounded-full pointer-events-none z-0"></div>
+          <div className="relative z-10 flex flex-col items-center justify-center min-h-full py-8 px-4 sm:px-6">
             <div className="text-center max-w-md">
-              <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-[#36e27b]/10 mb-6">
+              <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-[#36e27b]/15 border border-[#36e27b]/30 mb-6">
                 <svg className="w-12 h-12 text-[#36e27b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h1 className="text-3xl font-extrabold text-white mb-4">No Grid Available Today</h1>
-              <p className="text-gray-400 mb-8">Today&apos;s grid hasn&apos;t been created yet. Check back soon for a new challenge!</p>
+              <h1 className="text-4xl sm:text-5xl font-black text-white mb-4 leading-tight">No Grid Available</h1>
+              <p className="text-gray-400 text-sm sm:text-base mb-8 leading-relaxed">Today&apos;s grid hasn&apos;t been created yet. Check back soon for a new challenge!</p>
               <button
                 onClick={fetchGrid}
-                className="px-6 py-3 bg-[#36e27b] hover:bg-[#2dd670] text-black font-bold rounded-full transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(54,226,123,0.3)]"
+                className="px-8 py-4 bg-gradient-to-r from-[#36e27b] to-[#2dd670] hover:from-[#2dd670] hover:to-[#25c364] text-black font-bold rounded-xl transition-all transform hover:scale-105 shadow-[0_0_30px_rgba(54,226,123,0.4)]"
               >
                 Refresh
               </button>
@@ -312,10 +315,11 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans flex overflow-hidden">
       {/* Left Sidebar */}
-      <aside className="hidden lg:flex flex-col w-[280px] bg-[#121212] border-r border-white/5 h-screen p-6 gap-6 overflow-y-auto">
-        <div className="flex flex-col items-center gap-4 py-4">
+      <aside className="hidden lg:flex flex-col w-[280px] bg-gradient-to-b from-[#121212] to-[#0f0f0f] border-r border-white/10 h-screen p-6 gap-6 overflow-y-auto">
+        <div className="flex flex-col items-center gap-4 py-4 rounded-2xl bg-white/[0.02] p-4 backdrop-blur-sm">
           <div className="relative group cursor-pointer">
-            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#36e27b] p-1">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#36e27b]/50 to-transparent blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-[#36e27b] p-1 bg-[#1a1a1a]">
               {session.user.image && (
                 <Image
                   src={session.user.image}
@@ -328,17 +332,17 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="text-center">
-            <h2 className="text-xl font-bold text-white">{session.user.name || "Player"}</h2>
-            <p className="text-gray-400 text-sm mt-1">{session.user.email}</p>
+            <h2 className="text-lg font-bold text-white">{session.user.name || "Player"}</h2>
+            <p className="text-gray-500 text-xs mt-1.5">{session.user.email}</p>
           </div>
         </div>
 
         {existingSubmission && (
           <>
-            <div className="h-px w-full bg-white/10"></div>
-            <div className="bg-[#1a1a1a] p-4 rounded-xl border border-white/5">
-              <p className="text-sm text-gray-400 mb-2">Your Score</p>
-              <p className="text-3xl font-bold text-[#36e27b]">{existingSubmission.score}/9</p>
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+            <div className="bg-gradient-to-br from-[#36e27b]/10 to-[#36e27b]/5 p-5 rounded-2xl border border-[#36e27b]/30 backdrop-blur-sm">
+              <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider font-semibold">Your Score</p>
+              <p className="text-4xl font-black text-[#36e27b]">{existingSubmission.score}<span className="text-xl text-gray-400">/9</span></p>
             </div>
           </>
         )}
@@ -346,11 +350,20 @@ export default function DashboardPage() {
         <div className="flex-1"></div>
 
         <div className="flex flex-col gap-3">
+          <Link
+            href="/"
+            className="flex items-center justify-center gap-2 w-full h-11 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl transition-all border border-white/10 hover:border-white/20 text-sm"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back Home
+          </Link>
           <button
             onClick={handleSignOut}
-            className="flex items-center justify-center gap-2 w-full h-12 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-full transition-colors border border-white/10"
+            className="flex items-center justify-center gap-2 w-full h-11 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl transition-all border border-white/10 hover:border-white/20 text-sm"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
             Sign Out
@@ -360,40 +373,41 @@ export default function DashboardPage() {
 
       {/* Center Grid */}
       <section className="flex-1 flex flex-col h-screen bg-[#050505] relative overflow-y-auto">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-[#36e27b]/5 blur-[120px] rounded-full pointer-events-none z-0"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#0f3d31_0%,transparent_50%)] pointer-events-none z-0"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-[#36e27b]/4 blur-[120px] rounded-full pointer-events-none z-0"></div>
 
-        <div className="relative z-10 flex flex-col items-center justify-start min-h-full py-8 px-4">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 mb-2 px-3 py-1 rounded-full bg-[#36e27b]/10 border border-[#36e27b]/20">
+        <div className="relative z-10 flex flex-col items-center justify-start min-h-full py-10 px-4 sm:px-6">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-[#36e27b]/15 border border-[#36e27b]/30 backdrop-blur-sm">
               <span className="w-2 h-2 rounded-full bg-[#36e27b] animate-pulse"></span>
-              <span className="text-[#36e27b] text-xs font-bold uppercase tracking-wider">
+              <span className="text-[#36e27b] text-xs font-bold uppercase tracking-widest">
                 Daily Grid #{grid.gridNumber}
               </span>
             </div>
-            <h1 className="text-4xl font-extrabold text-white tracking-tight mb-4">
-              Football Grid Challenge
+            <h1 className="text-5xl sm:text-6xl font-black text-white tracking-tight mb-6 leading-tight">
+              Football Grid
             </h1>
 
             {/* Live timer — only shows while playing */}
             {!existingSubmission && (
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
-                <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-white/5 border border-white/15 backdrop-blur-sm hover:bg-white/8 transition-colors">
+                <svg className="w-4 h-4 text-[#36e27b] animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className={`text-sm font-mono font-bold tabular-nums ${timerStarted ? "text-[#36e27b]" : "text-gray-500"}`}>
+                <span className={`text-sm font-mono font-bold tabular-nums transition-colors ${timerStarted ? "text-[#36e27b]" : "text-gray-400"}`}>
                   {timerStarted ? formatTime(timerSeconds) : "00:00"}
                 </span>
                 {!timerStarted && (
-                  <span className="text-gray-600 text-xs">starts on first click</span>
+                  <span className="text-gray-500 text-xs">click to start</span>
                 )}
               </div>
             )}
           </div>
 
           {/* Grid */}
-          <div className="w-full max-w-3xl">
+          <div className="w-full max-w-4xl">
             {/* Column Headers */}
-            <div className="grid grid-cols-4 mb-2 gap-2">
+            <div className="grid grid-cols-4 mb-3 gap-2 sm:gap-3">
               <div className="col-span-1"></div>
               {colCriteria.map((criteria, idx) => {
                 if (!criteria) return null;
@@ -403,9 +417,9 @@ export default function DashboardPage() {
                     : getAwardMetadata(criteria.value as never).icon;
 
                 return (
-                  <div key={idx} className="flex flex-col items-center justify-center bg-[#121212] p-2 rounded-lg border border-white/10 aspect-[4/3]">
-                    <div className="text-3xl mb-2">{icon}</div>
-                    <span className="text-xs font-bold text-center text-gray-300">
+                  <div key={idx} className="flex flex-col items-center justify-center bg-gradient-to-br from-white/10 to-white/5 p-3 sm:p-4 rounded-xl border border-white/10 hover:border-[#36e27b]/50 transition-colors backdrop-blur-sm aspect-[4/3]">
+                    <div className="text-3xl sm:text-4xl mb-2">{icon}</div>
+                    <span className="text-xs sm:text-sm font-bold text-center text-gray-200 line-clamp-2">
                       {criteria.type === "award" ? getAwardMetadata(criteria.value as never).name : criteria.value}
                     </span>
                   </div>
@@ -414,7 +428,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Grid Rows */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 sm:gap-3">
               {[0, 1, 2].map((rowIndex) => {
                 const rowCrit = rowCriteria[rowIndex];
                 if (!rowCrit) return null;
@@ -425,10 +439,10 @@ export default function DashboardPage() {
                     : getAwardMetadata(rowCrit.value as never).icon;
 
                 return (
-                  <div key={rowIndex} className="grid grid-cols-4 gap-2 h-28">
-                    <div className="col-span-1 flex flex-col items-center justify-center bg-[#121212] p-2 rounded-lg border border-white/10">
-                      <span className="text-2xl mb-1">{rowIcon}</span>
-                      <span className="text-xs font-bold text-center text-gray-300">
+                  <div key={rowIndex} className="grid grid-cols-4 gap-2 sm:gap-3 h-24 sm:h-32 md:h-40">
+                    <div className="col-span-1 flex flex-col items-center justify-center bg-gradient-to-br from-white/10 to-white/5 p-2 sm:p-4 rounded-xl border border-white/10 hover:border-[#36e27b]/50 transition-colors backdrop-blur-sm">
+                      <span className="text-2xl sm:text-3xl mb-1">{rowIcon}</span>
+                      <span className="text-xs sm:text-sm font-bold text-center text-gray-200 line-clamp-2">
                         {rowCrit.type === "award" ? getAwardMetadata(rowCrit.value as never).name : rowCrit.value}
                       </span>
                     </div>
@@ -442,16 +456,16 @@ export default function DashboardPage() {
                         return (
                           <div
                             key={colIndex}
-                            className={`col-span-1 rounded-xl border flex flex-col items-center justify-center relative overflow-hidden ${
+                            className={`col-span-1 rounded-xl border-2 flex flex-col items-center justify-center relative overflow-hidden backdrop-blur-sm transition-all ${
                               answer.isCorrect
-                                ? "bg-green-900/20 border-[#36e27b]/50"
-                                : "bg-red-900/20 border-red-500/50"
+                                ? "bg-green-900/30 border-[#36e27b]/60 shadow-lg shadow-green-500/10"
+                                : "bg-red-900/30 border-red-500/60 shadow-lg shadow-red-500/10"
                             }`}
                           >
-                            <span className="text-xs font-bold text-white px-2 py-0.5 rounded-full backdrop-blur-sm">
+                            <span className="text-xs sm:text-sm font-bold text-white px-2 py-1 rounded-lg backdrop-blur-sm text-center line-clamp-2">
                               {answer.playerName}
                             </span>
-                            <div className={`absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center ${answer.isCorrect ? "bg-[#36e27b]" : "bg-red-500"}`}>
+                            <div className={`absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center ${answer.isCorrect ? "bg-[#36e27b] shadow-lg shadow-green-500/50" : "bg-red-500 shadow-lg shadow-red-500/50"}`}>
                               {answer.isCorrect ? (
                                 <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -471,9 +485,9 @@ export default function DashboardPage() {
                           <button
                             key={colIndex}
                             onClick={() => handleCellClick(rowIndex, colIndex)}
-                            className="col-span-1 bg-[#36e27b]/10 rounded-xl border border-[#36e27b]/30 flex items-center justify-center hover:border-[#36e27b] transition-all cursor-pointer"
+                            className="col-span-1 bg-gradient-to-br from-[#36e27b]/25 to-[#36e27b]/10 rounded-xl border-2 border-[#36e27b]/50 flex items-center justify-center hover:border-[#36e27b]/80 hover:from-[#36e27b]/35 transition-all cursor-pointer backdrop-blur-sm"
                           >
-                            <span className="text-sm font-bold text-[#36e27b]">{playerName}</span>
+                            <span className="text-xs sm:text-sm font-bold text-[#36e27b] px-2 text-center line-clamp-2">{playerName}</span>
                           </button>
                         );
                       }
@@ -482,9 +496,9 @@ export default function DashboardPage() {
                         <button
                           key={colIndex}
                           onClick={() => handleCellClick(rowIndex, colIndex)}
-                          className="col-span-1 bg-[#1a1a1a] rounded-xl border border-white/5 flex items-center justify-center hover:border-[#36e27b] hover:bg-[#222] transition-all"
+                          className="col-span-1 bg-white/5 rounded-xl border-2 border-white/10 flex items-center justify-center hover:border-[#36e27b]/50 hover:bg-white/10 transition-all group"
                         >
-                          <span className="text-2xl text-gray-600 group-hover:text-[#36e27b]">+</span>
+                          <span className="text-2xl sm:text-3xl text-gray-500 group-hover:text-[#36e27b] transition-colors">+</span>
                         </button>
                       );
                     })}
@@ -495,35 +509,35 @@ export default function DashboardPage() {
           </div>
 
           {!existingSubmission && (
-            <div className="mt-8 flex flex-col items-center gap-4 w-full max-w-sm">
+            <div className="mt-10 sm:mt-12 flex flex-col items-center gap-5 w-full max-w-sm px-4">
               <button
                 onClick={handleSubmitGrid}
                 disabled={submitting || Object.keys(gridState).length === 0}
-                className="w-full h-14 bg-[#36e27b] hover:bg-[#2dd670] text-black text-lg font-bold rounded-full shadow-[0_0_20px_rgba(54,226,123,0.3)] transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-14 sm:h-16 bg-gradient-to-r from-[#36e27b] to-[#2dd670] hover:from-[#2dd670] hover:to-[#25c364] text-black text-base sm:text-lg font-bold rounded-2xl shadow-[0_0_30px_rgba(54,226,123,0.4)] transition-all transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:hover:scale-100"
               >
                 Submit Grid
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </button>
-              <p className="text-xs text-gray-400">{Object.keys(gridState).length}/9 cells filled</p>
+              <p className="text-xs sm:text-sm text-gray-400">{Object.keys(gridState).length}/9 cells filled</p>
             </div>
           )}
 
           {existingSubmission && (
-            <div className="mt-8 text-center flex items-center gap-4 justify-center">
-              <p className="text-gray-400">You&apos;ve already submitted today&apos;s grid!</p>
+            <div className="mt-10 sm:mt-12 text-center flex flex-col sm:flex-row items-center gap-4 justify-center px-4">
+              <p className="text-gray-400 text-sm sm:text-base">Grid already submitted</p>
               <button
                 onClick={() => setShowResults(true)}
-                className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-full transition-colors border border-white/10 cursor-pointer"
+                className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl transition-all border border-white/20 hover:border-white/40 cursor-pointer text-sm"
               >
                 View Results
               </button>
               <Link
                 href="/"
-                className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-full transition-colors border border-white/10"
+                className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl transition-all border border-white/20 hover:border-white/40 text-sm"
               >
-                Go Back
+                Go Home
               </Link>
             </div>
           )}
@@ -544,34 +558,34 @@ export default function DashboardPage() {
 
       {/* Partial submission warning */}
       {showPartialWarning && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
-          <div className="bg-[#121212] rounded-2xl border border-yellow-500/30 p-6 w-full max-w-sm shadow-2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center shrink-0">
-                <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
+          <div className="bg-gradient-to-br from-[#1a1a1a] to-[#121212] rounded-2xl border border-yellow-500/40 p-7 w-full max-w-sm shadow-2xl">
+            <div className="flex items-start gap-4 mb-5">
+              <div className="w-12 h-12 rounded-full bg-yellow-500/15 flex items-center justify-center shrink-0">
+                <svg className="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-white font-bold text-base">Not all cells filled</h3>
-                <p className="text-gray-400 text-sm">You&apos;ve only filled {Object.keys(gridState).length}/9 cells.</p>
+                <h3 className="text-white font-bold text-lg">Incomplete Submission</h3>
+                <p className="text-gray-400 text-sm">Only {Object.keys(gridState).length}/9 cells filled.</p>
               </div>
             </div>
-            <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-              Empty cells will be marked as incorrect. Was this a mistake, or do you want to submit anyway?
+            <p className="text-gray-300 text-sm mb-6 leading-relaxed">
+              Empty cells will be marked as incorrect. Continue editing or submit anyway?
             </p>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
               <button
                 onClick={submitAnyway}
-                className="w-full h-11 bg-[#36e27b] hover:bg-[#2dd670] text-black font-bold rounded-xl transition-all text-sm"
+                className="w-full h-11 bg-gradient-to-r from-[#36e27b] to-[#2dd670] hover:from-[#2dd670] hover:to-[#25c364] text-black font-bold rounded-xl transition-all text-sm"
               >
                 Submit anyway
               </button>
               <button
                 onClick={() => setShowPartialWarning(false)}
-                className="w-full h-11 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl transition-colors border border-white/10 text-sm"
+                className="w-full h-11 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl transition-colors border border-white/20 hover:border-white/40 text-sm"
               >
-                Go back and fill more
+                Keep editing
               </button>
             </div>
           </div>

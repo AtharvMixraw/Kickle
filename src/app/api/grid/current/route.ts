@@ -16,15 +16,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get today's date at midnight
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Match any grid scheduled for the user's local calendar day
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const startOfTomorrow = new Date(startOfToday);
+    startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
 
     // Find today's active grid
     const grid = await prisma.grid.findFirst({
       where: {
-        date: today,
+        date: {
+          gte: startOfToday,
+          lt: startOfTomorrow,
+        },
         isActive: true,
+      },
+      orderBy: {
+        date: "asc",
       },
       include: {
         cells: {
@@ -43,9 +52,9 @@ export async function GET(request: NextRequest) {
     // Check if user has already submitted for this grid
     const existingSubmission = await prisma.gridSubmission.findUnique({
       where: {
-        userId_gridId: {
+        userId_gridNumber: {
           userId: session.user.id,
-          gridId: grid.id,
+          gridNumber: grid.gridNumber,
         },
       },
       include: {

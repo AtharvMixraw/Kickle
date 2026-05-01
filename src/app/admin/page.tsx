@@ -40,6 +40,17 @@ const DEFAULT_COLS: ColCriteria[] = [
   { type: "award", value: "Ballon d'Or" },
 ];
 
+const formatDateInputValue = (input: string | Date) => {
+  const date = new Date(input);
+  return date.toISOString().split("T")[0];
+};
+
+const getNextGridDate = (input: string | Date) => {
+  const date = new Date(input);
+  date.setDate(date.getDate() + 1);
+  return formatDateInputValue(date);
+};
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function AdminPage() {
@@ -81,14 +92,27 @@ export default function AdminPage() {
     try {
       setLoadingGrids(true);
       const res = await fetch("/api/admin/grid");
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Failed to load grids");
+      }
+
       const data = await res.json();
       setExistingGrids(data.grids || []);
-      // Auto-set next grid number
+
+      // Auto-set next grid number and next available date
       if (data.grids?.length > 0) {
-        setGridNumber(data.grids[0].gridNumber + 1);
+        const latestGrid = data.grids[0];
+        setGridNumber(latestGrid.gridNumber + 1);
+        setDate((currentDate) => {
+          const today = formatDateInputValue(new Date());
+          return currentDate === today
+            ? getNextGridDate(latestGrid.date)
+            : currentDate;
+        });
       }
-    } catch {
-      // ignore
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Failed to load grids");
     } finally {
       setLoadingGrids(false);
     }
@@ -139,6 +163,8 @@ export default function AdminPage() {
 
       setSaveSuccess(true);
       setSampleAnswers({});
+      setDate(getNextGridDate(date));
+      setGridNumber((prev) => prev + 1);
       fetchGrids();
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (e) {

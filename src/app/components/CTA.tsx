@@ -14,10 +14,10 @@ export default function CTA() {
   };
 
   return (
-    <section className="py-16 sm:py-20 px-4 sm:px-6">
+    <section className="py-14 sm:py-18 px-4 sm:px-6 border-t border-white/5 bg-gradient-to-b from-transparent to-black/20">
       <div className="max-w-7xl mx-auto">
         {/* CTA Section */}
-        <div className="text-center mb-16 sm:mb-20">
+        <div className="text-center mb-12 sm:mb-16">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 sm:mb-8 leading-tight">
             Ready to prove your ball<br />knowledge?
           </h2>
@@ -49,7 +49,7 @@ export default function CTA() {
                   onClick={handleGoogleSignIn}
                   className="bg-gray-800 hover:bg-gray-700 text-white font-bold px-8 py-4 rounded-full transition text-sm sm:text-base"
                 >
-                  View Leaderboard
+                  Sign In to View Leaderboard
                 </button>
               </>
             )}

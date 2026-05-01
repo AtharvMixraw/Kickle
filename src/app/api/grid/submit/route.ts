@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
 
     const existingSubmission = await prisma.gridSubmission.findUnique({
-      where: { userId_gridId: { userId: session.user.id, gridId: grid.id } },
+      where: { userId_gridNumber: { userId: session.user.id, gridNumber: grid.gridNumber } },
     });
 
     if (existingSubmission) {
@@ -112,6 +112,8 @@ export async function POST(request: NextRequest) {
       data: {
         userId: session.user.id,
         gridId: grid.id,
+        gridNumber: grid.gridNumber,
+        gridDate: grid.date,
         score,
         timeTakenSeconds:
           timeTakenSeconds && timeTakenSeconds < 7200 ? timeTakenSeconds : null,

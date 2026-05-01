@@ -18,19 +18,23 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { date, gridNumber, rows, cols, sampleAnswers } = body;
+    const normalizedGridNumber = Number(gridNumber);
+    const normalizedDate = new Date(date);
 
     // Validate
-    if (!date || !gridNumber || rows?.length !== 3 || cols?.length !== 3) {
+    if (!date || !Number.isInteger(normalizedGridNumber) || rows?.length !== 3 || cols?.length !== 3) {
       return NextResponse.json({ error: "Invalid grid data" }, { status: 400 });
     }
 
     // Check for duplicate date or gridNumber
     const existing = await prisma.grid.findFirst({
-      where: { OR: [{ date: new Date(date) }, { gridNumber }] },
+      where: { OR: [{ date: normalizedDate }, { gridNumber: normalizedGridNumber }] },
     });
+
     if (existing) {
+      const conflictField = existing.gridNumber === normalizedGridNumber ? "this grid number" : "this date";
       return NextResponse.json(
-        { error: `A grid already exists for ${existing.date === new Date(date) ? "this date" : "this grid number"}` },
+        { error: `A grid already exists for ${conflictField}` },
         { status: 409 }
       );
     }
@@ -53,8 +57,8 @@ export async function POST(request: NextRequest) {
 
     const grid = await prisma.grid.create({
       data: {
-        gridNumber: parseInt(gridNumber),
-        date: new Date(date),
+        gridNumber: normalizedGridNumber,
+        date: normalizedDate,
         isActive: true,
         cells: { create: cells },
       },

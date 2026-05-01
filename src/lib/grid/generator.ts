@@ -118,13 +118,22 @@ export async function createCustomGrid(
  * Get today's active grid
  */
 export async function getTodayGrid() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const startOfTomorrow = new Date(startOfToday);
+  startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
 
   const grid = await prisma.grid.findFirst({
     where: {
-      date: today,
+      date: {
+        gte: startOfToday,
+        lt: startOfTomorrow,
+      },
       isActive: true,
+    },
+    orderBy: {
+      date: "asc",
     },
     include: {
       cells: {

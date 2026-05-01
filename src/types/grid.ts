@@ -63,7 +63,9 @@ export interface CellAnswer {
 export interface GridSubmission {
   id: string;
   userId: string;
-  gridId: string;
+  gridId: string | null;
+  gridNumber: number;
+  gridDate: Date;
   score: number;
   submittedAt: Date;
   answers: CellAnswer[];

@@ -16,10 +16,10 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative pb-16 sm:pb-20 lg:min-h-screen">
+    <section className="relative pb-10 sm:pb-14 lg:min-h-[92vh]">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-20 sm:pt-28 lg:pt-32">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-24 sm:pt-28 lg:pt-32">
         <div className="grid lg:grid-cols-2 gap-10 items-center">
           {/* Left Content */}
           <div>
@@ -28,13 +28,13 @@ export default function Hero() {
               <span className="text-[#00ff88] text-xs font-medium">LIVE CHALLENGE</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight tracking-tight">
               <span className="text-white">Test Your Football</span>
               <br />
               <span className="text-[#00ff88]">Knowledge Daily</span>
             </h1>
 
-            <p className="text-gray-400 text-base sm:text-lg mb-8 max-w-lg">
+            <p className="text-gray-300 text-base sm:text-lg mb-8 max-w-lg">
               Solve the 3×3 grid. Top the leaderboard.
               Join thousands of fans in the ultimate daily trivia game.
             </p>

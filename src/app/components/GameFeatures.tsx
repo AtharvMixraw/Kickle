@@ -18,7 +18,7 @@ export default function GameFeatures() {
   ];
 
   return (
-    <section className="py-16 sm:py-20 px-4 sm:px-6">
+    <section className="py-14 sm:py-18 px-4 sm:px-6 border-t border-white/5">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">Game Features</h2>
@@ -29,7 +29,7 @@ export default function GameFeatures() {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="bg-gradient-to-br from-gray-900/50 to-transparent border border-gray-800 rounded-2xl p-6 hover:border-[#00ff88] transition group"
+              className="bg-gradient-to-br from-gray-900/55 to-transparent border border-white/10 rounded-2xl p-6 hover:border-[#00ff88]/70 transition group"
             >
               <div className="text-3xl mb-4">{feature.icon}</div>
               <h3 className="text-white font-bold text-lg mb-2">{feature.title}</h3>

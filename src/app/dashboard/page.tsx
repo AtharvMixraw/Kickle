@@ -381,7 +381,7 @@ export default function DashboardPage() {
             <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-[#36e27b]/15 border border-[#36e27b]/30 backdrop-blur-sm">
               <span className="w-2 h-2 rounded-full bg-[#36e27b] animate-pulse"></span>
               <span className="text-[#36e27b] text-xs font-bold uppercase tracking-widest">
-                Daily Grid #{grid.gridNumber}
+                Daily Challenge
               </span>
             </div>
             <h1 className="text-5xl sm:text-6xl font-black text-white tracking-tight mb-6 leading-tight">
@@ -599,7 +599,6 @@ export default function DashboardPage() {
           onClose={() => setShowResults(false)}
           score={submissionResult.score}
           answers={submissionResult.answers}
-          gridNumber={grid.gridNumber}
           timeTakenSeconds={submissionResult.timeTakenSeconds}
         />
       )}

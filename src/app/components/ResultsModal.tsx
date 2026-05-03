@@ -5,25 +5,24 @@ import Link from "next/link";
 import { useState } from "react";
 
 // 🔁 Replace with your real domain once hosted
-const SITE_URL = "footballgrid.vercel.app";
+const SITE_URL = "playkickle.vercel.app";
 
 interface ResultsModalProps {
   isOpen: boolean;
   onClose: () => void;
   score: number;
   answers: CellAnswer[];
-  gridNumber: number;
   timeTakenSeconds?: number | null;
 }
 
-function buildShareText(score: number, answers: CellAnswer[], gridNumber: number): string {
+function buildShareText(score: number, answers: CellAnswer[]): string {
   // Build 3x3 emoji grid row by row (answers are ordered row 0-2, col 0-2)
   const rows = [0, 1, 2].map((row) =>
     [0, 1, 2].map((col) => (answers[row * 3 + col]?.isCorrect ? "🟩" : "🟥")).join("")
   );
 
   return [
-    `⚽ Football Grid #${gridNumber}`,
+    `⚽ Kickle Daily Challenge`,
     ``,
     rows[0],
     rows[1],
@@ -45,7 +44,6 @@ export default function ResultsModal({
   onClose,
   score,
   answers,
-  gridNumber,
   timeTakenSeconds,
 }: ResultsModalProps) {
   const [copied, setCopied] = useState(false);
@@ -56,7 +54,7 @@ export default function ResultsModal({
   const percentage = Math.round((correctAnswers / 9) * 100);
 
   const handleShare = async () => {
-    const text = buildShareText(score, answers, gridNumber);
+    const text = buildShareText(score, answers);
 
     // Use native share sheet on mobile, fall back to clipboard on desktop
     if (navigator.share) {

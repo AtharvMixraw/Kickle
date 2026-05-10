@@ -17,24 +17,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Match any grid scheduled for the user's local calendar day
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-
-    const startOfTomorrow = new Date(startOfToday);
-    startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
-
-    // Find today's active grid
+    // Find the latest active grid (by gridNumber)
     const grid = await prisma.grid.findFirst({
       where: {
-        date: {
-          gte: startOfToday,
-          lt: startOfTomorrow,
-        },
         isActive: true,
       },
       orderBy: {
-        date: "asc",
+        gridNumber: "desc",
       },
       include: {
         cells: {

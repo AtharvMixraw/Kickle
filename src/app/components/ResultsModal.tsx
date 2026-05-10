@@ -147,6 +147,20 @@ export default function ResultsModal({
           )}
         </button>
 
+        {/* Buy Me a Coffee */}
+        <a
+          href="https://buymeacoffee.com/atharvmishra10"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full h-12 mb-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all bg-[#FFDD00] hover:bg-[#FFDD00]/90 text-[#0D0D0D] shadow-[0_0_20px_rgba(255,221,0,0.15)] hover:shadow-[0_0_28px_rgba(255,221,0,0.25)]"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 884 1279" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M792.4 1002.4C792.4 1002.4 643 1074.8 512 1074.8C381 1074.8 231.6 1002.4 231.6 1002.4L208.8 1171.2C208.8 1171.2 339 1279 512 1279C685 1279 815.2 1171.2 815.2 1171.2L792.4 1002.4Z" fill="#0D0D0D"/>
+            <path d="M512 0C229.2 0 0 149.6 0 334.2C0 518.8 84.2 596 84.2 596L163.8 874.6C163.8 874.6 310.4 984.8 512 984.8C713.6 984.8 860.2 874.6 860.2 874.6L884 596C884 596 884 518.8 884 334.2C884 149.6 794.8 0 512 0Z" fill="#0D0D0D"/>
+          </svg>
+          ☕ Buy me a coffee
+        </a>
+
         {/* Answer Details */}
         <div className="mb-6">
           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">

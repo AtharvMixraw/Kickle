@@ -80,6 +80,20 @@ export interface GridState {
 export interface CurrentGridResponse {
   grid: Grid;
   userSubmission: GridSubmission | null;
+  playerStats?: {
+    totalScore: number;
+    gamesPlayed: number;
+    league: {
+      key: string;
+      name: string;
+      emoji: string;
+      minPoints: number;
+      maxPoints: number | null;
+      accentClass: string;
+      borderClass: string;
+      bgClass: string;
+    };
+  };
 }
 
 export interface SubmitGridRequest {

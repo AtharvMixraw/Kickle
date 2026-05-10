@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { getLeagueTier } from "@/lib/league";
 
 export async function GET(request: NextRequest) {
   try {
@@ -38,7 +39,11 @@ export async function GET(request: NextRequest) {
       }))
       .filter((u) => u.gamesPlayed > 0) // only players who have played
       .sort((a, b) => b.totalScore - a.totalScore)
-      .map((entry, idx) => ({ ...entry, rank: idx + 1 }));
+      .map((entry, idx) => ({
+        ...entry,
+        rank: idx + 1,
+        league: getLeagueTier(entry.totalScore),
+      }));
 
     return NextResponse.json({ leaderboard: ranked, currentUserId: session.user.id });
   } catch (error) {

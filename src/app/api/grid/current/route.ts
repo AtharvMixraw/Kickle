@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { getLeagueTier } from "@/lib/league";
 
 export async function GET(request: NextRequest) {
   try {
@@ -66,10 +67,30 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    const playerAggregate = await prisma.gridSubmission.aggregate({
+      where: {
+        userId: session.user.id,
+      },
+      _sum: {
+        score: true,
+      },
+      _count: {
+        id: true,
+      },
+    });
+
+    const totalScore = playerAggregate._sum.score ?? 0;
+    const gamesPlayed = playerAggregate._count.id;
+
     return NextResponse.json({
       grid,
       userSubmission: existingSubmission,
       hasSubmitted: !!existingSubmission,
+      playerStats: {
+        totalScore,
+        gamesPlayed,
+        league: getLeagueTier(totalScore),
+      },
     });
   } catch (error) {
     console.error("Error fetching current grid:", error);

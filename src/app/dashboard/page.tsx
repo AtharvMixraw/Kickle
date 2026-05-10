@@ -9,6 +9,7 @@ import LoadingScreen from "../components/LoadingScreen";
 import ResultsModal from "../components/ResultsModal";
 import type { Grid, GridCell, CellAnswer, GridSubmission, RowCriteriaType, ColCriteriaType } from "@/types/grid";
 import { getClubMetadata, getCountryMetadata, getAwardMetadata } from "@/lib/grid/constants";
+import type { LeagueTier } from "@/lib/league";
 import Link from "next/link";
 
 export default function DashboardPage() {
@@ -37,6 +38,11 @@ export default function DashboardPage() {
 
   // Existing submission
   const [existingSubmission, setExistingSubmission] = useState<GridSubmission | null>(null);
+  const [playerStats, setPlayerStats] = useState<{
+    totalScore: number;
+    gamesPlayed: number;
+    league: LeagueTier;
+  } | null>(null);
 
   useEffect(() => {
     if (!isPending && !session) {
@@ -72,6 +78,7 @@ export default function DashboardPage() {
 
       const data = await response.json();
       setGrid(data.grid);
+      setPlayerStats(data.playerStats ?? null);
 
       if (data.userSubmission) {
         setExistingSubmission(data.userSubmission);
@@ -345,6 +352,23 @@ export default function DashboardPage() {
               <p className="text-4xl font-black text-[#36e27b]">{existingSubmission.score}<span className="text-xl text-gray-400">/9</span></p>
             </div>
           </>
+        )}
+
+        {playerStats && (
+          <div className={`p-5 rounded-2xl border backdrop-blur-sm ${playerStats.league.bgClass} ${playerStats.league.borderClass}`}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider font-semibold">Your League</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{playerStats.league.emoji}</span>
+                  <div>
+                    <p className={`text-lg font-bold ${playerStats.league.accentClass}`}>{playerStats.league.name}</p>
+                    <p className="text-xs text-gray-400">{playerStats.totalScore} pts · {playerStats.gamesPlayed} game{playerStats.gamesPlayed !== 1 ? "s" : ""}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         <div className="flex-1"></div>

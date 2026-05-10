@@ -1,6 +1,7 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
+import { LEAGUE_TIERS, type LeagueTier } from "@/lib/league";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -13,6 +14,7 @@ interface LeaderboardEntry {
   totalScore: number;
   gamesPlayed: number;
   rank: number;
+  league: LeagueTier;
 }
 
 export default function LeaderboardPage() {
@@ -114,12 +116,49 @@ export default function LeaderboardPage() {
               )}
               <div>
                 <p className="text-sm font-semibold text-white">You</p>
-                <p className="text-xs text-gray-500">{myEntry.gamesPlayed} game{myEntry.gamesPlayed !== 1 ? "s" : ""} played</p>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <p className="text-xs text-gray-500">{myEntry.gamesPlayed} game{myEntry.gamesPlayed !== 1 ? "s" : ""} played</p>
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${myEntry.league.bgClass} ${myEntry.league.borderClass} ${myEntry.league.accentClass} border`}>
+                    <span>{myEntry.league.emoji}</span>
+                    <span>{myEntry.league.name}</span>
+                  </span>
+                </div>
               </div>
             </div>
             <div className="text-right">
               <p className="text-2xl font-black text-[#36e27b]">{myEntry.totalScore}</p>
               <p className="text-xs text-gray-500">total pts</p>
+            </div>
+          </div>
+        )}
+
+        {!error && leaderboard.length > 0 && (
+          <div className="mb-6 rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+              <div>
+                <p className="text-sm font-semibold text-white">League Ladder</p>
+                <p className="text-xs text-gray-500">Your total points decide your football league.</p>
+              </div>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {LEAGUE_TIERS.map((tier) => {
+                const rangeLabel = tier.maxPoints == null ? `${tier.minPoints}+ pts` : `${tier.minPoints}-${tier.maxPoints} pts`;
+
+                return (
+                  <div
+                    key={tier.key}
+                    className={`rounded-xl border px-3 py-2 ${tier.bgClass} ${tier.borderClass}`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-base">{tier.emoji}</span>
+                        <span className={`text-sm font-semibold ${tier.accentClass}`}>{tier.name}</span>
+                      </div>
+                      <span className="text-[11px] text-gray-400 whitespace-nowrap">{rangeLabel}</span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -189,9 +228,15 @@ export default function LeaderboardPage() {
                     <p className={`font-semibold truncate text-sm ${isMe ? "text-[#36e27b]" : "text-white"}`}>
                       {entry.name} {isMe && <span className="text-xs font-normal text-[#36e27b]/60">(you)</span>}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {entry.gamesPlayed} game{entry.gamesPlayed !== 1 ? "s" : ""}
-                    </p>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <p className="text-xs text-gray-500">
+                        {entry.gamesPlayed} game{entry.gamesPlayed !== 1 ? "s" : ""}
+                      </p>
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${entry.league.bgClass} ${entry.league.borderClass} ${entry.league.accentClass} border`}>
+                        <span>{entry.league.emoji}</span>
+                        <span>{entry.league.name}</span>
+                      </span>
+                    </div>
                   </div>
 
                   {/* Score */}

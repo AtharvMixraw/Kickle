@@ -14,30 +14,51 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Aggregate total score per user across all submissions
-    const leaderboard = await prisma.user.findMany({
+    // Aggregate in DB to avoid fetching all submission rows into memory
+    const scoreRows = await prisma.gridSubmission.groupBy({
+      by: ["userId"],
+      _sum: {
+        score: true,
+      },
+      _count: {
+        _all: true,
+      },
+    });
+
+    if (scoreRows.length === 0) {
+      return NextResponse.json({ leaderboard: [], currentUserId: session.user.id });
+    }
+
+    const users = await prisma.user.findMany({
+      where: {
+        id: {
+          in: scoreRows.map((row) => row.userId),
+        },
+      },
       select: {
         id: true,
         name: true,
         image: true,
-        submissions: {
-          select: {
-            score: true,
-          },
-        },
       },
     });
 
+    const userMap = new Map(users.map((user) => [user.id, user]));
+
     // Map to ranked entries
-    const ranked = leaderboard
-      .map((user) => ({
-        id: user.id,
-        name: user.name,
-        image: user.image,
-        totalScore: user.submissions.reduce((sum, s) => sum + s.score, 0),
-        gamesPlayed: user.submissions.length,
-      }))
-      .filter((u) => u.gamesPlayed > 0) // only players who have played
+    const ranked = scoreRows
+      .map((row) => {
+        const user = userMap.get(row.userId);
+        if (!user) return null;
+
+        return {
+          id: user.id,
+          name: user.name,
+          image: user.image,
+          totalScore: row._sum.score ?? 0,
+          gamesPlayed: row._count._all,
+        };
+      })
+      .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
       .sort((a, b) => b.totalScore - a.totalScore)
       .map((entry, idx) => ({
         ...entry,

@@ -3,9 +3,17 @@
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const { data: session } = authClient.useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    router.prefetch("/leaderboard");
+    router.prefetch("/dashboard");
+  }, [router]);
 
   const handleGoogleSignIn = async () => {
     await authClient.signIn.social({
@@ -34,6 +42,9 @@ export default function Navbar() {
             <Link className="text-sm font-bold font-display hover:text-primary transition-colors" href="/leaderboard">
               Leaderboard
             </Link>
+            <a className="text-sm font-bold font-display hover:text-primary transition-colors" href="#prizes">
+              Prizes
+            </a>
           </nav>
 
           <div className="flex items-center gap-3 sm:gap-4">

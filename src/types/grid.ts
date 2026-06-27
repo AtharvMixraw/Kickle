@@ -1,28 +1,45 @@
 // Grid criteria types
 export type ClubName =
+  | "Arsenal"
+  | "Atletico Madrid"
+  | "Bayern Munich"
   | "Barcelona"
+  | "Borussia Dortmund"
+  | "Chelsea"
   | "Inter Miami"
   | "Juventus"
   | "Liverpool"
+  | "Napoli"
   | "Manchester City"
   | "Manchester United"
   | "Milan"
   | "Paris Saint-Germain"
-  | "Real Madrid";
+  | "Real Madrid"
+  | "Tottenham Hotspur";
 
 export type CountryName =
+  | "Argentina"
+  | "Belgium"
   | "Brazil"
   | "Croatia"
   | "Czechia"
   | "England"
   | "France"
+  | "Germany"
   | "Italy"
+  | "Netherlands"
   | "Portugal"
   | "Spain"
   | "Ukraine"
-  | "Argentina";
+  | "Uruguay";
 
-export type AwardName = "UCL" | "Ballon d'Or" | "Golden Boot";
+export type AwardName =
+  | "UCL"
+  | "Ballon d'Or"
+  | "Golden Boot"
+  | "FIFA World Cup"
+  | "Premier League"
+  | "La Liga";
 
 export type RowCriteriaType = "club" | "award";
 export type ColCriteriaType = "country" | "award";

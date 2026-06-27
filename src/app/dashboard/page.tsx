@@ -45,16 +45,15 @@ export default function DashboardPage() {
   } | null>(null);
 
   useEffect(() => {
-    if (!isPending && !session) {
-      router.push("/");
-    }
-  }, [session, isPending, router]);
+    if (isPending) return;
 
-  useEffect(() => {
-    if (session?.user) {
-      fetchGrid();
+    if (!session?.user) {
+      router.push("/");
+      return;
     }
-  }, [session]);
+
+    fetchGrid();
+  }, [session, isPending, router]);
 
   // Cleanup timer on unmount
   useEffect(() => {

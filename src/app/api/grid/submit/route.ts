@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { validatePlayerAnswer } from "@/lib/grid/validator";
+import { invalidateLeaderboardCache } from "@/lib/cache/leaderboard-cache";
 import type { SubmitGridRequest } from "@/types/grid";
 
 function normalise(s: string) {
@@ -123,6 +124,8 @@ export async function POST(request: NextRequest) {
         answers: { include: { cell: true } },
       },
     });
+
+    invalidateLeaderboardCache();
 
     return NextResponse.json({
       submission,

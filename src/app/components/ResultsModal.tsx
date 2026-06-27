@@ -84,11 +84,11 @@ export default function ResultsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="bg-[#121212] rounded-2xl border border-white/10 p-8 w-full max-w-2xl mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4">
+      <div className="bg-background border-2 border-white p-8 w-full max-w-2xl hard-shadow-white max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[#36e27b]/20 mb-4">
+          <div className="inline-flex items-center justify-center w-20 h-20 border-2 border-primary bg-surface-container mb-4">
             <span className="text-4xl">
               {percentage >= 80 ? "🏆" : percentage >= 60 ? "⭐" : percentage >= 40 ? "👍" : "💪"}
             </span>
@@ -100,7 +100,7 @@ export default function ResultsModal({
         </div>
 
         {/* Score + Time */}
-        <div className="bg-[#1a1a1a] rounded-xl p-6 mb-6 border border-white/5">
+        <div className="bg-surface-container p-6 mb-6 border-2 border-surface-container-highest">
           <div className="flex items-center gap-6 mb-4">
             <div>
               <p className="text-gray-400 text-xs font-medium mb-1">Score</p>
@@ -113,9 +113,9 @@ export default function ResultsModal({
               </div>
             )}
           </div>
-          <div className="w-full bg-[#2a2a2a] rounded-full h-3 overflow-hidden">
+          <div className="w-full bg-surface-container-high h-3 overflow-hidden border border-surface-container-highest">
             <div
-              className="h-full bg-gradient-to-r from-[#36e27b] to-[#2dd670] transition-all duration-1000 ease-out"
+              className="h-full bg-primary transition-all duration-1000 ease-out"
               style={{ width: `${percentage}%` }}
             />
           </div>
@@ -124,10 +124,10 @@ export default function ResultsModal({
         {/* Share Button — above answers, hard to miss */}
         <button
           onClick={handleShare}
-          className={`w-full h-12 mb-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all border ${
+          className={`w-full h-12 mb-6 font-extrabold uppercase text-xs tracking-wider flex items-center justify-center gap-2 transition-all border-2 ${
             copied
-              ? "bg-[#36e27b]/10 border-[#36e27b]/40 text-[#36e27b]"
-              : "bg-white/5 hover:bg-white/10 border-white/10 hover:border-white/20 text-white"
+              ? "bg-primary/10 border-primary text-primary"
+              : "bg-surface-container hover:bg-surface-container-high border-surface-container-highest hover:border-white text-white"
           }`}
         >
           {copied ? (
@@ -152,7 +152,7 @@ export default function ResultsModal({
           href="https://buymeacoffee.com/atharvmishra10"
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full h-12 mb-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all bg-[#FFDD00] hover:bg-[#FFDD00]/90 text-[#0D0D0D] shadow-[0_0_20px_rgba(255,221,0,0.15)] hover:shadow-[0_0_28px_rgba(255,221,0,0.25)]"
+          className="w-full h-12 mb-6 font-extrabold uppercase text-xs tracking-wider flex items-center justify-center gap-2 transition-all bg-[#FFDD00] hover:bg-[#f2cf00] text-[#0D0D0D] border-2 border-[#0D0D0D]"
         >
           <svg className="w-5 h-5" viewBox="0 0 884 1279" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M792.4 1002.4C792.4 1002.4 643 1074.8 512 1074.8C381 1074.8 231.6 1002.4 231.6 1002.4L208.8 1171.2C208.8 1171.2 339 1279 512 1279C685 1279 815.2 1171.2 815.2 1171.2L792.4 1002.4Z" fill="#0D0D0D"/>
@@ -170,10 +170,10 @@ export default function ResultsModal({
             {answers.map((answer, idx) => (
               <div
                 key={answer.id}
-                className={`rounded-lg border ${
+                className={`border-2 ${
                   answer.isCorrect
-                    ? "bg-green-900/20 border-[#36e27b]/30"
-                    : "bg-red-900/20 border-red-500/30"
+                    ? "bg-primary/10 border-primary/60"
+                    : "bg-red-900/20 border-red-400/50"
                 }`}
               >
                 <div className="flex items-center justify-between p-3">
@@ -183,7 +183,7 @@ export default function ResultsModal({
                     </span>
                     <span className="text-white font-medium truncate">{answer.playerName}</span>
                   </div>
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${answer.isCorrect ? "bg-[#36e27b]" : "bg-red-500"}`}>
+                  <div className={`w-6 h-6 flex items-center justify-center flex-shrink-0 ${answer.isCorrect ? "bg-primary" : "bg-red-500"}`}>
                     {answer.isCorrect ? (
                       <svg className="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -198,7 +198,7 @@ export default function ResultsModal({
 
                 {answer.llmReasoning && (
                   <div className="px-3 pb-3">
-                    <div className={`text-sm p-3 rounded-lg ${answer.isCorrect ? "bg-green-900/30 text-green-100" : "bg-red-900/30 text-red-100"}`}>
+                    <div className={`text-sm p-3 border ${answer.isCorrect ? "bg-green-900/30 text-green-100 border-primary/30" : "bg-red-900/30 text-red-100 border-red-500/30"}`}>
                       <div className="flex items-start gap-2">
                         <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -208,7 +208,7 @@ export default function ResultsModal({
                     </div>
 
                     {!answer.isCorrect && answer.suggestedAnswer && (
-                      <div className="mt-2 p-3 rounded-lg bg-blue-900/30 border border-blue-500/30">
+                      <div className="mt-2 p-3 bg-blue-900/30 border border-blue-500/30">
                         <div className="flex items-start gap-2">
                           <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -222,7 +222,7 @@ export default function ResultsModal({
                     )}
 
                     {!answer.isCorrect && !answer.suggestedAnswer && answer.llmReasoning?.toLowerCase().includes("impossible") && (
-                      <div className="mt-2 p-3 rounded-lg bg-yellow-900/30 border border-yellow-500/30">
+                      <div className="mt-2 p-3 bg-yellow-900/30 border border-yellow-500/30">
                         <div className="flex items-start gap-2">
                           <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -245,7 +245,7 @@ export default function ResultsModal({
         <div className="flex flex-col gap-3">
           <Link
             href="/leaderboard"
-            className="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#36e27b]/40 text-white font-semibold rounded-lg transition-all flex items-center justify-center gap-2"
+            className="w-full h-12 bg-surface-container hover:bg-surface-container-high border-2 border-surface-container-highest hover:border-primary text-white font-bold uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2"
           >
             <span>🏆</span>
             View Leaderboard
@@ -253,7 +253,7 @@ export default function ResultsModal({
 
           <button
             onClick={onClose}
-            className="w-full h-12 bg-[#36e27b] hover:bg-[#2dd670] text-black font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(54,226,123,0.3)]"
+            className="w-full h-12 bg-primary text-black font-extrabold uppercase text-xs tracking-wider transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hard-shadow"
           >
             Close
           </button>

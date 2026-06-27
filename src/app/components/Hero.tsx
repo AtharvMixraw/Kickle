@@ -16,72 +16,68 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative pb-10 sm:pb-14 lg:min-h-[92vh]">
+    <section className="relative border-b-2 border-surface-container-highest">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-24 sm:pt-28 lg:pt-32">
-        <div className="grid lg:grid-cols-2 gap-10 items-center">
-          {/* Left Content */}
-          <div>
-            <div className="inline-flex items-center gap-2 bg-green-900/30 border border-green-500/30 px-3 py-1.5 rounded-full mb-5">
-              <span className="w-2 h-2 bg-[#00ff88] rounded-full animate-pulse shrink-0"></span>
-              <span className="text-[#00ff88] text-xs font-medium">LIVE CHALLENGE</span>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-24">
+        <div className="grid lg:grid-cols-12 gap-0 border-2 border-surface-container-highest">
+          <div className="lg:col-span-7 p-8 sm:p-12 border-b-2 lg:border-b-0 lg:border-r-2 border-surface-container-highest flex flex-col justify-center">
+            <div className="inline-flex items-center gap-2 text-primary text-xs font-bold uppercase tracking-[0.2em] mb-6">
+              <span className="w-3 h-3 bg-primary" />
+              Live Challenge
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight tracking-tight">
-              <span className="text-white">Test Your Football</span>
-              <br />
-              <span className="text-[#00ff88]">Knowledge Daily</span>
+            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-extrabold leading-[0.9] tracking-tighter mb-8">
+              Test Your <br />
+              <span className="text-primary">Football</span> <br />
+              Knowledge
             </h1>
 
-            <p className="text-gray-300 text-base sm:text-lg mb-8 max-w-lg">
-              Solve the 3×3 grid. Top the leaderboard.
-              Join thousands of fans in the ultimate daily trivia game.
+            <p className="text-lg sm:text-xl text-on-background/70 max-w-xl leading-tight mb-10 font-medium uppercase">
+              Solve the 3x3 grid. Beat the clock. Top the leaderboard. Join thousands of fans in the ultimate daily trivia game.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
               {session?.user ? (
                 <>
                   <Link
                     href="/dashboard"
-                    className="bg-[#00ff88] hover:bg-[#00dd77] text-black font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-full flex items-center gap-2 transition transform hover:scale-105 text-sm sm:text-base"
+                    className="h-16 px-10 bg-primary text-black text-lg font-extrabold font-display transition-all hover:-translate-x-1 hover:-translate-y-1 active:translate-x-0 active:translate-y-0 hard-shadow-white flex items-center justify-center gap-3"
                   >
-                    <span>▶</span>
-                    <span>Play Today&apos;s Grid</span>
+                    Play Today&apos;s Grid
                   </Link>
                   <Link
                     href="/leaderboard"
-                    className="text-gray-300 hover:text-[#00ff88] transition flex items-center gap-2 font-medium text-sm sm:text-base"
+                    className="h-16 px-8 border-2 border-white font-display font-bold text-sm uppercase tracking-wider hover:bg-white hover:text-black transition-colors flex items-center justify-center"
                   >
-                    <span>🏆</span>
-                    <span>Leaderboard</span>
+                    Leaderboard
                   </Link>
                 </>
               ) : (
                 <>
                   <button
                     onClick={handleGoogleSignIn}
-                    className="bg-[#00ff88] hover:bg-[#00dd77] text-black font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-full flex items-center gap-2 transition transform hover:scale-105 text-sm sm:text-base"
+                    className="h-16 px-10 bg-primary text-black text-lg font-extrabold font-display transition-all hover:-translate-x-1 hover:-translate-y-1 active:translate-x-0 active:translate-y-0 hard-shadow-white flex items-center justify-center"
                   >
-                    <span>▶</span>
-                    <span>Play Today&apos;s Grid</span>
+                    Play Today&apos;s Grid
                   </button>
-                  <span className="text-gray-500 text-sm">
+                  <span className="text-[10px] font-bold text-on-background/50 uppercase tracking-widest mt-1">
                     Free to play
                   </span>
                 </>
               )}
+
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-on-background/50 uppercase tracking-widest mb-1">
+                  New challenge in
+                </span>
+                <span className="font-display text-primary font-bold text-lg tabular-nums">04:23:12</span>
+              </div>
             </div>
           </div>
 
-          {/* Grid Preview — hidden on mobile to keep page clean */}
-          <div className="hidden lg:block">
-            <GridPreview />
-          </div>
-
-          {/* Mobile: compact grid preview */}
-          <div className="lg:hidden mt-6">
-            <GridPreview compact />
+          <div className="lg:col-span-5 bg-surface-container p-8 flex items-center justify-center">
+            <GridPreview compact={false} />
           </div>
         </div>
       </div>

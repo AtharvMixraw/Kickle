@@ -15,62 +15,70 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 w-full border-b border-white/10 bg-[#0a1e1a]/85 backdrop-blur-md z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
-        {/* Logo — truncates gracefully on small screens */}
-        <Link href="/" className="flex items-center gap-2 shrink-0">
-          <div className="w-8 h-8 bg-[#00ff88] rounded-full flex items-center justify-center shrink-0">
-            <span className="text-black font-bold text-sm">⚽</span>
+    <header className="sticky top-0 z-50 w-full bg-background border-b-2 border-surface-container-highest">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          <Link href="/" className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center justify-center size-10 bg-primary text-black border-2 border-primary">
+              <span className="font-bold">⚽</span>
+            </div>
+            <span className="text-xl font-extrabold font-display tracking-tighter">
+              Football Grid Challenge
+            </span>
+          </Link>
+
+          <nav className="hidden md:flex items-center gap-10">
+            <a className="text-sm font-bold font-display hover:text-primary transition-colors" href="#how-it-works">
+              How to Play
+            </a>
+            <Link className="text-sm font-bold font-display hover:text-primary transition-colors" href="/leaderboard">
+              Leaderboard
+            </Link>
+          </nav>
+
+          <div className="flex items-center gap-3 sm:gap-4">
+            {session?.user ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="hidden sm:inline-flex items-center gap-2 bg-primary text-black px-5 py-2.5 font-bold font-display text-sm transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 hard-shadow"
+                >
+                  Play
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 border-2 border-surface-container-highest bg-surface-container px-2 py-1.5 hover:border-primary transition-colors"
+                >
+                  {session.user.image ? (
+                    <Image
+                      src={session.user.image}
+                      alt={session.user.name || "User"}
+                      width={28}
+                      height={28}
+                      className="size-7 border-2 border-primary"
+                    />
+                  ) : (
+                    <span className="size-7 bg-primary text-black text-xs font-bold flex items-center justify-center">
+                      {session.user.name?.[0]?.toUpperCase() || "U"}
+                    </span>
+                  )}
+                  <span className="hidden md:inline text-xs font-bold uppercase tracking-wide max-w-[120px] truncate">
+                    {session.user.name || "Player"}
+                  </span>
+                </Link>
+              </>
+            ) : (
+              <button
+                onClick={handleGoogleSignIn}
+                className="flex items-center gap-2 bg-primary text-black px-6 py-2.5 font-bold font-display text-sm transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 hard-shadow"
+              >
+                <span className="hidden sm:inline">Sign In</span>
+                <span className="sm:hidden">Sign In</span>
+              </button>
+            )}
           </div>
-          <span className="text-white font-bold text-sm sm:text-base leading-tight">
-            <span className="hidden sm:inline">Football Grid Challenge</span>
-            <span className="sm:hidden">Kickle</span>
-          </span>
-        </Link>
-
-        {/* Right side */}
-        <div className="flex items-center gap-2 sm:gap-4">
-          {session?.user ? (
-            <>
-              {/* Leaderboard — icon only on mobile, text on sm+ */}
-              <Link
-                href="/leaderboard"
-                className="flex items-center gap-1.5 text-gray-300 hover:text-[#00ff88] transition-colors text-sm font-medium"
-              >
-                <span>🏆</span>
-                <span className="hidden sm:inline">Leaderboard</span>
-              </Link>
-
-              {/* User pill — avatar only on mobile */}
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 bg-gray-800/50 border border-gray-700 rounded-full pl-1 pr-3 py-1 hover:border-[#00ff88] transition"
-              >
-                {session.user.image && (
-                  <Image
-                    src={session.user.image}
-                    alt={session.user.name || "User"}
-                    width={28}
-                    height={28}
-                    className="w-7 h-7 rounded-full border-2 border-[#00ff88]"
-                  />
-                )}
-                <span className="text-white font-medium text-sm hidden sm:inline truncate max-w-[120px]">
-                  {session.user.name}
-                </span>
-              </Link>
-            </>
-          ) : (
-            <button
-              onClick={handleGoogleSignIn}
-              className="flex items-center gap-2 bg-white hover:bg-gray-100 text-black px-3 sm:px-4 py-2 rounded-lg transition font-medium cursor-pointer text-sm whitespace-nowrap"
-            >
-              <span className="hidden sm:inline">Sign in with Google</span>
-              <span className="sm:hidden">Sign in</span>
-            </button>
-          )}
         </div>
       </div>
-    </nav>
+    </header>
   );
 }

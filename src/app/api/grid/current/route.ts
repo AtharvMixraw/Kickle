@@ -39,34 +39,34 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Check if user has already submitted for this grid
-    const existingSubmission = await prisma.gridSubmission.findUnique({
-      where: {
-        userId_gridNumber: {
-          userId: session.user.id,
-          gridNumber: grid.gridNumber,
-        },
-      },
-      include: {
-        answers: {
-          include: {
-            cell: true,
+    const [existingSubmission, playerAggregate] = await Promise.all([
+      prisma.gridSubmission.findUnique({
+        where: {
+          userId_gridNumber: {
+            userId: session.user.id,
+            gridNumber: grid.gridNumber,
           },
         },
-      },
-    });
-
-    const playerAggregate = await prisma.gridSubmission.aggregate({
-      where: {
-        userId: session.user.id,
-      },
-      _sum: {
-        score: true,
-      },
-      _count: {
-        id: true,
-      },
-    });
+        include: {
+          answers: {
+            include: {
+              cell: true,
+            },
+          },
+        },
+      }),
+      prisma.gridSubmission.aggregate({
+        where: {
+          userId: session.user.id,
+        },
+        _sum: {
+          score: true,
+        },
+        _count: {
+          id: true,
+        },
+      }),
+    ]);
 
     const totalScore = playerAggregate._sum.score ?? 0;
     const gamesPlayed = playerAggregate._count.id;

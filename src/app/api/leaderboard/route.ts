@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { getLeagueTier } from "@/lib/league";
+import { getLeaderboardCache, setLeaderboardCache } from "@/lib/cache/leaderboard-cache";
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,6 +13,11 @@ export async function GET(request: NextRequest) {
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const cachedLeaderboard = getLeaderboardCache();
+    if (cachedLeaderboard) {
+      return NextResponse.json({ leaderboard: cachedLeaderboard, currentUserId: session.user.id });
     }
 
     // Aggregate in DB to avoid fetching all submission rows into memory
@@ -65,6 +71,8 @@ export async function GET(request: NextRequest) {
         rank: idx + 1,
         league: getLeagueTier(entry.totalScore),
       }));
+
+    setLeaderboardCache(ranked);
 
     return NextResponse.json({ leaderboard: ranked, currentUserId: session.user.id });
   } catch (error) {

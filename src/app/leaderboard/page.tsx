@@ -26,16 +26,15 @@ export default function LeaderboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isPending && !session) {
-      router.push("/");
-    }
-  }, [session, isPending, router]);
+    if (isPending) return;
 
-  useEffect(() => {
-    if (session?.user) {
-      fetchLeaderboard();
+    if (!session?.user) {
+      router.push("/");
+      return;
     }
-  }, [session]);
+
+    fetchLeaderboard();
+  }, [session, isPending, router]);
 
   const fetchLeaderboard = async () => {
     try {

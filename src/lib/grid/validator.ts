@@ -109,6 +109,12 @@ function formatCriteria(type: string, value: string): string {
         return "Won the Ballon d'Or";
       } else if (value === "Golden Boot") {
         return "Won the Golden Boot";
+      } else if (value === "FIFA World Cup") {
+        return "Won the FIFA World Cup";
+      } else if (value === "Premier League") {
+        return "Won the Premier League";
+      } else if (value === "La Liga") {
+        return "Won La Liga";
       }
       return `Won ${value}`;
     default:

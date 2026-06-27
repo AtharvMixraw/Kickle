@@ -1,6 +1,7 @@
 import Hero from './components/Hero';
 import GameFeatures from './components/GameFeatures';
 import HowItWorks from './components/HowItWorks';
+import Prizes from '@/app/components/Prizes';
 import CTA from './components/CTA';
 
 export default function Home() {
@@ -9,6 +10,7 @@ export default function Home() {
       <Hero />
       <GameFeatures />
       <HowItWorks />
+      <Prizes />
       <CTA />
     </main>
   );

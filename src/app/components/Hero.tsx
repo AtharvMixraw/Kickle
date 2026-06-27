@@ -1,7 +1,6 @@
 "use client";
 
 import Navbar from './Navbar';
-import GridPreview from './GridPreview';
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 
@@ -19,15 +18,15 @@ export default function Hero() {
     <section className="relative border-b-2 border-surface-container-highest">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-24">
+      <div className="max-w-[92rem] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-24">
         <div className="grid lg:grid-cols-12 gap-0 border-2 border-surface-container-highest">
-          <div className="lg:col-span-7 p-8 sm:p-12 border-b-2 lg:border-b-0 lg:border-r-2 border-surface-container-highest flex flex-col justify-center">
+          <div className="lg:col-span-12 p-8 sm:p-12 flex flex-col justify-center">
             <div className="inline-flex items-center gap-2 text-primary text-xs font-bold uppercase tracking-[0.2em] mb-6">
               <span className="w-3 h-3 bg-primary" />
               Live Challenge
             </div>
 
-            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-extrabold leading-[0.9] tracking-tighter mb-8">
+            <h1 className="max-w-[10ch] text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-[0.9] tracking-[-0.03em] mb-8">
               Test Your <br />
               <span className="text-primary">Football</span> <br />
               Knowledge
@@ -66,19 +65,9 @@ export default function Hero() {
                   </span>
                 </>
               )}
-
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-on-background/50 uppercase tracking-widest mb-1">
-                  New challenge in
-                </span>
-                <span className="font-display text-primary font-bold text-lg tabular-nums">04:23:12</span>
-              </div>
             </div>
           </div>
 
-          <div className="lg:col-span-5 bg-surface-container p-8 flex items-center justify-center">
-            <GridPreview compact={false} />
-          </div>
         </div>
       </div>
     </section>

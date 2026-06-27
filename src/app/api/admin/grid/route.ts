@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { hasSolvableGridCombinations } from "@/lib/grid/generator";
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
@@ -24,6 +25,13 @@ export async function POST(request: NextRequest) {
     // Validate
     if (!date || !Number.isInteger(normalizedGridNumber) || rows?.length !== 3 || cols?.length !== 3) {
       return NextResponse.json({ error: "Invalid grid data" }, { status: 400 });
+    }
+
+    if (!hasSolvableGridCombinations(rows, cols)) {
+      return NextResponse.json(
+        { error: "Invalid criteria combination: one or more cells have no valid player overlap" },
+        { status: 400 }
+      );
     }
 
     // Check for duplicate date or gridNumber

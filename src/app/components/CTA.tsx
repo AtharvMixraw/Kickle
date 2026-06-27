@@ -2,15 +2,28 @@
 
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function CTA() {
   const { data: session } = authClient.useSession();
+  const [activeLegal, setActiveLegal] = useState<"privacy" | "terms" | null>(null);
 
   const handleGoogleSignIn = async () => {
     await authClient.signIn.social({
       provider: "google",
       callbackURL: "/",
     });
+  };
+
+  const legalContent = {
+    privacy: {
+      title: "Privacy Policy",
+      body: "We only collect the minimum data needed to run Kickle: your name, email, profile image, gameplay submissions, and leaderboard stats. We do not sell personal data. Session tokens are used for authentication and security. You can request account deletion by contacting support, and your gameplay history will be removed from active views within a reasonable period.",
+    },
+    terms: {
+      title: "Terms",
+      body: "Kickle is for personal entertainment use. By using the app, you agree not to abuse the platform, automate gameplay, scrape private endpoints, or attempt to compromise service integrity. Leaderboards may be reset or adjusted for fairness. We may update game rules and product features over time. Continued use means you accept the latest terms.",
+    },
   };
 
   return (
@@ -99,8 +112,20 @@ export default function CTA() {
                 <nav className="flex flex-col gap-4 font-bold text-xs uppercase">
                   <a className="hover:text-primary transition-colors" href="#">About Us</a>
                   <a className="hover:text-primary transition-colors" href="#">Contact</a>
-                  <a className="hover:text-primary transition-colors" href="#">Privacy Policy</a>
-                  <a className="hover:text-primary transition-colors" href="#">Terms</a>
+                  <button
+                    type="button"
+                    onClick={() => setActiveLegal("privacy")}
+                    className="hover:text-primary transition-colors text-left"
+                  >
+                    Privacy Policy
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveLegal("terms")}
+                    className="hover:text-primary transition-colors text-left"
+                  >
+                    Terms
+                  </button>
                 </nav>
               </div>
             </div>
@@ -111,13 +136,35 @@ export default function CTA() {
               © 2026 Football Grid Challenge. All rights reserved.
             </p>
             <div className="flex items-center gap-8">
-              <a aria-label="Twitter" className="text-xs font-extrabold hover:text-primary transition-colors" href="#">TWITTER/X</a>
+              <a aria-label="Twitter" className="text-xs font-extrabold hover:text-primary transition-colors" href="https://x.com/playkickle" target="_blank" rel="noopener noreferrer">TWITTER/X</a>
               <a aria-label="Instagram" className="text-xs font-extrabold hover:text-primary transition-colors" href="#">INSTAGRAM</a>
               <a aria-label="Discord" className="text-xs font-extrabold hover:text-primary transition-colors" href="#">DISCORD</a>
             </div>
           </div>
         </div>
       </footer>
+
+      {activeLegal && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center px-4">
+          <div className="w-full max-w-xl bg-background border-2 border-white p-6 hard-shadow-white">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <h3 className="text-2xl font-extrabold font-display tracking-tight">
+                {legalContent[activeLegal].title}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setActiveLegal(null)}
+                className="border-2 border-white px-3 py-1 text-xs font-bold uppercase hover:bg-white hover:text-black transition-colors"
+              >
+                Close
+              </button>
+            </div>
+            <p className="text-sm text-on-background/80 leading-relaxed uppercase">
+              {legalContent[activeLegal].body}
+            </p>
+          </div>
+        </div>
+      )}
     </>
   );
 }

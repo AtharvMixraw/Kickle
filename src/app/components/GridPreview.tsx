@@ -3,74 +3,67 @@ interface GridPreviewProps {
 }
 
 export default function GridPreview({ compact = false }: GridPreviewProps) {
-  const gridData = [
-    { row: 'BRAZIL 🇧🇷', col: 'REAL MADRID', name: '' },
-    { row: 'BRAZIL 🇧🇷', col: 'MAN CITY', name: 'Ederson' },
-    { row: 'BRAZIL 🇧🇷', col: '🏆 UCL', name: 'Marcelo' },
-
-    { row: 'FRANCE 🇫🇷', col: 'REAL MADRID', name: 'Benzema' },
-    { row: 'FRANCE 🇫🇷', col: 'MAN CITY', name: '?' },
-    { row: 'FRANCE 🇫🇷', col: '🏆 UCL', name: 'Henry' },
-
-    { row: "BALLON D'OR", col: 'REAL MADRID', name: 'Modric' },
-    { row: "BALLON D'OR", col: 'MAN CITY', name: 'Rodri' },
-    { row: "BALLON D'OR", col: '🏆 UCL', name: 'Kaka' },
+  const colHeaders = ["Real Madrid", "Man City", "🏆 UCL"];
+  const rowHeaders = ["Brazil 🇧🇷", "France 🇫🇷", "Ballon d'Or"];
+  const cells = [
+    ["", "Ederson", "Marcelo"],
+    ["Benzema", "?", "Henry"],
+    ["Modric", "Rodri", "Kaka"],
   ];
 
-  const colHeaders = ['REAL MADRID', 'MAN CITY', '🏆 UCL'];
-  const rowHeaders = ['BRAZIL 🇧🇷', 'FRANCE 🇫🇷', "BALLON D'OR"];
-
   return (
-    <div className={`bg-gradient-to-br from-gray-900/50 to-green-900/20 border border-gray-800 rounded-2xl backdrop-blur ${compact ? 'p-4' : 'p-8'}`}>
-      {/* Column Headers */}
-      <div className="grid grid-cols-4 gap-2 mb-2">
-        <div />
-        {colHeaders.map((col, i) => (
-          <div key={i} className={`bg-gray-900/80 rounded-lg flex items-center justify-center text-center ${compact ? 'p-1.5' : 'p-3'}`}>
-            <p className={`font-bold leading-tight ${col.includes('UCL') ? 'text-[#00ff88]' : 'text-white'} ${compact ? 'text-[9px]' : 'text-xs'}`}>
-              {col}
-            </p>
+    <div className={`w-full ${compact ? "max-w-sm" : "max-w-md"} aspect-square bg-background border-4 border-white p-4`}>
+      <div className="grid grid-cols-4 gap-2 h-full">
+        <div className="col-start-2 flex items-center justify-center bg-surface-container-highest text-[8px] font-bold uppercase text-on-background/60 p-1 text-center">
+          {colHeaders[0]}
+        </div>
+        <div className="flex items-center justify-center bg-surface-container-highest text-[8px] font-bold uppercase text-on-background/60 p-1 text-center">
+          {colHeaders[1]}
+        </div>
+        <div className="flex items-center justify-center bg-surface-container-highest text-[8px] font-bold uppercase text-on-background/60 p-1 text-center">
+          {colHeaders[2]}
+        </div>
+
+        {rowHeaders.map((rowHeader, rowIndex) => (
+          <div key={rowHeader} className="contents">
+            <div
+              className="flex items-center justify-center bg-surface-container-highest text-[8px] font-bold uppercase text-on-background/60 p-1 text-center"
+            >
+              {rowHeader}
+            </div>
+
+            {cells[rowIndex].map((cellValue, colIndex) => {
+              const isQuestion = cellValue === "?";
+              const isActive = (rowIndex === 0 && colIndex === 2) || (rowIndex === 1 && colIndex === 0) || (rowIndex === 2 && colIndex === 2);
+
+              if (cellValue === "") {
+                return (
+                  <div
+                    key={`${rowIndex}-${colIndex}`}
+                    className="bg-surface-container border-2 border-surface-container-highest flex items-center justify-center"
+                  >
+                    <div className="w-2 h-2 bg-primary/20" />
+                  </div>
+                );
+              }
+
+              return (
+                <div
+                  key={`${rowIndex}-${colIndex}`}
+                  className={`flex items-center justify-center text-[10px] font-bold ${
+                    isQuestion
+                      ? "bg-white text-black font-black text-xl"
+                      : isActive
+                        ? "bg-primary text-black"
+                        : "bg-surface-container border-2 border-surface-container-highest"
+                  }`}
+                >
+                  {cellValue.toUpperCase()}
+                </div>
+              );
+            })}
           </div>
         ))}
-      </div>
-
-      {/* Grid Rows */}
-      {[0, 1, 2].map((rowIndex) => (
-        <div key={rowIndex} className="grid grid-cols-4 gap-2 mb-2">
-          <div className={`bg-gray-900/80 rounded-lg flex items-center justify-center ${compact ? 'p-1.5' : 'p-3'}`}>
-            <p className={`text-white font-bold text-center leading-tight ${compact ? 'text-[9px]' : 'text-xs'}`}>
-              {rowHeaders[rowIndex]}
-            </p>
-          </div>
-
-          {[0, 1, 2].map((colIndex) => {
-            const cell = gridData[rowIndex * 3 + colIndex];
-            return (
-              <div
-                key={colIndex}
-                className={`bg-gray-900/50 border-2 ${
-                  cell.name === '?'
-                    ? 'border-[#00ff88] animate-pulse'
-                    : 'border-gray-800'
-                } rounded-lg flex items-center justify-center hover:border-[#00ff88] transition cursor-pointer ${compact ? 'h-12' : 'h-20'}`}
-              >
-                <p className={`text-white font-medium text-center ${compact ? 'text-[10px]' : 'text-sm'}`}>
-                  {cell.name}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      ))}
-
-      {/* Score Footer */}
-      <div className={`flex justify-between items-center ${compact ? 'mt-3' : 'mt-6'}`}>
-        <span className={`text-gray-400 ${compact ? 'text-xs' : 'text-sm'}`}>
-          Score: <span className="font-bold text-white">8/9</span>
-        </span>
-        <span className={`text-[#00ff88] ${compact ? 'text-xs' : 'text-sm'}`}>
-          ✓ Demo grid
-        </span>
       </div>
     </div>
   );

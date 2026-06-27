@@ -39,20 +39,16 @@ export default function LoadingScreen({ message = "Checking your answers..." }: 
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#050505] flex flex-col items-center justify-between py-20 px-6 font-sans overflow-hidden">
-      {/* Ambient glow */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#36e27b]/5 blur-[120px] rounded-full pointer-events-none" />
+    <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-between py-16 px-6 overflow-hidden">
+      <div className="w-full max-w-3xl border-2 border-surface-container-highest p-4 flex items-center justify-between text-xs font-bold uppercase tracking-[0.2em]">
+        <span className="text-primary">Kickle System</span>
+        <span className="text-on-background/60">Validating Grid</span>
+      </div>
 
-      {/* Top spacer */}
-      <div />
-
-      {/* Center — ball + progress */}
-      <div className="flex flex-col items-center gap-8 relative z-10">
-        {/* Animated football SVG */}
-        <div className="relative">
+      <div className="flex flex-col items-center gap-8 w-full max-w-3xl">
+        <div className="relative border-2 border-white p-6 bg-surface-container">
           <svg
-            className="w-28 h-28 text-white animate-[spin_4s_linear_infinite]"
-            style={{ filter: "drop-shadow(0 0 18px rgba(54,226,123,0.25))" }}
+            className="w-24 h-24 text-white animate-[spin_6s_linear_infinite]"
             fill="none"
             stroke="currentColor"
             strokeLinecap="round"
@@ -72,25 +68,21 @@ export default function LoadingScreen({ message = "Checking your answers..." }: 
             <circle cx="12" cy="12" r="3" />
             <path d="M12 7l-2.5 2.5 1 3.5 3 0 1-3.5z" />
           </svg>
-          {/* Ground shadow */}
-          <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-20 h-3 bg-[#36e27b]/15 blur-lg rounded-full" />
         </div>
 
-        {/* Progress bar */}
-        <div className="w-56 h-[3px] bg-white/10 rounded-full overflow-hidden">
+        <div className="w-full h-3 bg-surface-container border-2 border-surface-container-highest overflow-hidden">
           <div
-            className="h-full bg-[#36e27b] rounded-full shadow-[0_0_12px_rgba(54,226,123,0.6)]"
+            className="h-full bg-primary"
             style={{ animation: "progressLoad 3s ease-in-out infinite" }}
           />
         </div>
 
-        {/* Did you know */}
-        <div className="text-center space-y-4 max-w-lg mt-4">
-          <p className="text-[#36e27b] uppercase tracking-[0.2em] text-xs font-extrabold">
+        <div className="text-center space-y-4 border-2 border-white p-6 bg-surface-container w-full">
+          <p className="text-primary uppercase tracking-[0.2em] text-xs font-extrabold">
             Did you know?
           </p>
           <p
-            className="text-white text-2xl md:text-3xl font-extrabold leading-snug transition-all duration-400"
+            className="text-white text-xl md:text-2xl font-extrabold leading-snug transition-all duration-400 uppercase"
             style={{
               opacity: visible ? 1 : 0,
               transform: visible ? "translateY(0)" : "translateY(8px)",
@@ -102,12 +94,10 @@ export default function LoadingScreen({ message = "Checking your answers..." }: 
         </div>
       </div>
 
-      {/* Bottom status */}
-      <p className="text-gray-600 text-xs font-medium tracking-[0.2em] uppercase animate-pulse relative z-10">
+      <p className="text-on-background/50 text-xs font-bold tracking-[0.2em] uppercase animate-pulse">
         {message}
       </p>
 
-      {/* Progress keyframe */}
       <style>{`
         @keyframes progressLoad {
           0%   { width: 0%; }

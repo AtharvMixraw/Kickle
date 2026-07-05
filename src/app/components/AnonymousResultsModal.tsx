@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import NextGridCountdown from "./NextGridCountdown";
 
 interface AnonymousResultsModalProps {
   isOpen: boolean;
@@ -69,6 +70,8 @@ export default function AnonymousResultsModal({
             <p className="text-gray-400 text-sm">{correctAnswers} correct answers</p>
           </div>
         </div>
+
+        <NextGridCountdown className="mb-6" />
 
         {/* Call to Action */}
         <div className="mb-4">

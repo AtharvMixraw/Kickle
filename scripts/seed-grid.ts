@@ -1,20 +1,14 @@
-import { generateDailyGrid, getNextGridNumber } from "../src/lib/grid/generator";
+import { createOrGetDailyGrid } from "../src/lib/grid/scheduler";
 
 async function main() {
   try {
     console.log("🎮 Seeding today's grid...");
+    const { grid, created } = await createOrGetDailyGrid();
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const gridNumber = await getNextGridNumber();
-    
-    console.log(`📅 Date: ${today.toISOString().split('T')[0]}`);
-    console.log(`#️⃣ Grid Number: ${gridNumber}`);
-
-    const grid = await generateDailyGrid(today, gridNumber);
-
-    console.log("\n✅ Grid created successfully!");
+    console.log(
+      `📅 Date: ${grid.date.toISOString().split("T")[0]}\n#️⃣ Grid Number: ${grid.gridNumber}`
+    );
+    console.log(`\n✅ Grid ${created ? "created" : "already existed"} successfully!`);
     console.log(`Grid ID: ${grid.id}`);
     console.log("\n📊 Grid Layout:");
     console.log("Rows (clubs + award):");

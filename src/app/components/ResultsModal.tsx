@@ -4,6 +4,7 @@ import type { CellAnswer } from "@/types/grid";
 import Link from "next/link";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import NextGridCountdown from "./NextGridCountdown";
 
 const SITE_URL = "playkickle.vercel.app";
 
@@ -128,6 +129,8 @@ export default function ResultsModal({
             />
           </div>
         </div>
+
+        <NextGridCountdown className="mb-6" />
 
         {/* Share Button — above answers, hard to miss */}
         <button

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getAllClubs, getAllCountries, getAllAwards } from "./constants";
+import { getStartOfDayInTimeZone } from "./time";
 import type { ClubName, CountryName, AwardName } from "@/types/grid";
 
 type Criteria =
@@ -124,7 +125,9 @@ export async function generateDailyGrid(date: Date, gridNumber: number) {
       },
     },
     include: {
-      cells: true,
+      cells: {
+        orderBy: [{ row: "asc" }, { col: "asc" }],
+      },
     },
   });
 
@@ -216,7 +219,9 @@ export async function createCustomGrid(
       },
     },
     include: {
-      cells: true,
+      cells: {
+        orderBy: [{ row: "asc" }, { col: "asc" }],
+      },
     },
   });
 
@@ -227,11 +232,11 @@ export async function createCustomGrid(
  * Get today's active grid
  */
 export async function getTodayGrid() {
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
+  const timeZone = process.env.GRID_TIMEZONE || "UTC";
+  const startOfToday = getStartOfDayInTimeZone(new Date(), timeZone);
 
   const startOfTomorrow = new Date(startOfToday);
-  startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+  startOfTomorrow.setUTCDate(startOfTomorrow.getUTCDate() + 1);
 
   const grid = await prisma.grid.findFirst({
     where: {

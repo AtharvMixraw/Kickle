@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateDailyGrid, getNextGridNumber } from "@/lib/grid/generator";
+import { createOrGetDailyGrid } from "@/lib/grid/scheduler";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,20 +16,13 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { date } = body;
-
-    // Parse date or use today
     const gridDate = date ? new Date(date) : new Date();
-    gridDate.setHours(0, 0, 0, 0);
-
-    // Get next grid number
-    const gridNumber = await getNextGridNumber();
-
-    // Generate the grid
-    const grid = await generateDailyGrid(gridDate, gridNumber);
+    const { grid, created } = await createOrGetDailyGrid(gridDate);
 
     return NextResponse.json({
-      message: "Grid created successfully",
+      message: created ? "Grid created successfully" : "Grid already exists",
       grid,
+      created,
     });
   } catch (error) {
     console.error("Error seeding grid:", error);

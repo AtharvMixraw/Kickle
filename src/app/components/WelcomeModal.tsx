@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import popupDisplay from "../../../assets/popup.png";
 
 interface WelcomeModalProps {
   isOpen: boolean;
@@ -35,12 +37,21 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 backdrop-blur-sm">
-      <div className="bg-background border-2 border-primary p-8 w-full max-w-md hard-shadow-white">
+      <div className="bg-background border-2 border-primary p-5 sm:p-8 w-full max-w-lg hard-shadow-white max-h-[90vh] overflow-y-auto">
+        <div className="mb-6 overflow-hidden border-2 border-primary/40 bg-surface-container">
+          <Image
+            src={popupDisplay}
+            alt="Kickle popup display"
+            className="w-full h-auto object-cover"
+            priority
+          />
+        </div>
+
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/20 border-2 border-primary rounded-full mb-4">
-            <span className="text-4xl">⚽</span>
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-primary/20 border-2 border-primary rounded-full mb-4">
+            <span className="text-3xl sm:text-4xl">⚽</span>
           </div>
-          <h2 className="text-3xl font-extrabold text-primary mb-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-primary mb-2">
             Welcome to Kickle
           </h2>
           <p className="text-on-background text-sm leading-relaxed">

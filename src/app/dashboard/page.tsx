@@ -7,6 +7,8 @@ import Image from "next/image";
 import PlayerInputModal from "../components/PlayerInputModal";
 import LoadingScreen from "../components/LoadingScreen";
 import ResultsModal from "../components/ResultsModal";
+import AnonymousResultsModal from "../components/AnonymousResultsModal";
+import SignInPromptModal from "../components/SignInPromptModal";
 import type { Grid, GridCell, CellAnswer, GridSubmission, RowCriteriaType, ColCriteriaType } from "@/types/grid";
 import { getClubMetadata, getCountryMetadata, getAwardMetadata } from "@/lib/grid/constants";
 import type { LeagueTier } from "@/lib/league";
@@ -29,7 +31,9 @@ export default function DashboardPage() {
   // Modal states
   const [editingCell, setEditingCell] = useState<{ row: number; col: number; cell: GridCell } | null>(null);
   const [showResults, setShowResults] = useState(false);
+  const [showAnonymousResults, setShowAnonymousResults] = useState(false);
   const [showPartialWarning, setShowPartialWarning] = useState(false);
+  const [showSignInPrompt, setShowSignInPrompt] = useState(false);
   const [submissionResult, setSubmissionResult] = useState<{
     score: number;
     answers: CellAnswer[];
@@ -47,13 +51,9 @@ export default function DashboardPage() {
   useEffect(() => {
     if (isPending) return;
 
-    if (!session?.user) {
-      router.push("/");
-      return;
-    }
-
+    // Allow anonymous users to play
     fetchGrid();
-  }, [session, isPending, router]);
+  }, [isPending]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -215,7 +215,13 @@ export default function DashboardPage() {
         timeTakenSeconds: result.timeTakenSeconds ?? timerSeconds,
       });
       setExistingSubmission(result.submission);
-      setShowResults(true);
+      
+      // Show anonymous results modal if user is not authenticated
+      if (!session?.user) {
+        setShowAnonymousResults(true);
+      } else {
+        setShowResults(true);
+      }
     } catch (error) {
       console.error("Error submitting grid:", error);
       alert(error instanceof Error ? error.message : "Failed to submit grid");
@@ -238,13 +244,11 @@ export default function DashboardPage() {
     );
   }
 
-  if (!session?.user) {
-    return null;
-  }
-
   if (noGridAvailable) {
     return (
       <div className="min-h-screen bg-[#050505] text-white font-sans flex overflow-hidden">
+        {/* Sidebar - only show if authenticated */}
+        {session?.user ? (
         <aside className="hidden lg:flex flex-col w-[280px] bg-gradient-to-b from-[#121212] to-[#0f0f0f] border-r border-white/10 h-screen p-6 gap-6 overflow-y-auto">
           <div className="flex flex-col items-center gap-4 py-4 rounded-2xl bg-white/[0.02] p-4 backdrop-blur-sm">
             <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#36e27b] p-1 bg-[#1a1a1a]">
@@ -276,6 +280,7 @@ export default function DashboardPage() {
             Sign Out
           </button>
         </aside>
+        ) : null}
 
         <section className="flex-1 flex flex-col h-screen bg-[#050505] relative overflow-y-auto">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#0f3d31_0%,transparent_50%)] pointer-events-none z-0"></div>
@@ -320,7 +325,8 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans flex overflow-hidden">
-      {/* Left Sidebar */}
+      {/* Left Sidebar - only show if authenticated */}
+      {session?.user && (
       <aside className="hidden lg:flex flex-col w-[280px] bg-gradient-to-b from-[#121212] to-[#0f0f0f] border-r border-white/10 h-screen p-6 gap-6 overflow-y-auto">
         <div className="flex flex-col items-center gap-4 py-4 rounded-2xl bg-white/[0.02] p-4 backdrop-blur-sm">
           <div className="relative group cursor-pointer">
@@ -393,6 +399,7 @@ export default function DashboardPage() {
           </button>
         </div>
       </aside>
+      )}
 
       {/* Center Grid */}
       <section className="flex-1 flex flex-col h-screen bg-[#050505] relative overflow-y-auto">
@@ -615,6 +622,22 @@ export default function DashboardPage() {
         </div>
       )}
       
+      {/* Anonymous Results Modal */}
+      {showAnonymousResults && submissionResult && (
+        <AnonymousResultsModal
+          isOpen={showAnonymousResults}
+          onSkipForNow={() => {
+            setShowAnonymousResults(false);
+            router.push("/");
+          }}
+          score={submissionResult.score}
+          onViewDetails={() => {
+            setShowAnonymousResults(false);
+            setShowResults(true);
+          }}
+        />
+      )}
+      
       {/* Results Modal */}
       {showResults && submissionResult && (
         <ResultsModal
@@ -623,6 +646,17 @@ export default function DashboardPage() {
           score={submissionResult.score}
           answers={submissionResult.answers}
           timeTakenSeconds={submissionResult.timeTakenSeconds}
+          userSession={{ user: session?.user }}
+          onSignInPrompt={() => setShowSignInPrompt(true)}
+        />
+      )}
+      
+      {/* Sign In Prompt Modal */}
+      {submissionResult && (
+        <SignInPromptModal
+          isOpen={showSignInPrompt}
+          onClose={() => setShowSignInPrompt(false)}
+          score={submissionResult.score}
         />
       )}
     </div>

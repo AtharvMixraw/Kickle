@@ -5,17 +5,10 @@ import { getLeagueTier } from "@/lib/league";
 
 export async function GET(request: NextRequest) {
   try {
-    // Get authenticated user
+    // Get authenticated user (optional for anonymous play)
     const session = await auth.api.getSession({
       headers: request.headers,
     });
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
 
     // Find the latest active grid (by gridNumber)
     const grid = await prisma.grid.findFirst({
@@ -37,6 +30,16 @@ export async function GET(request: NextRequest) {
         { error: "No active grid found for today" },
         { status: 404 }
       );
+    }
+
+    // Only fetch user-specific data if authenticated
+    if (!session?.user) {
+      return NextResponse.json({
+        grid,
+        userSubmission: null,
+        hasSubmitted: false,
+        playerStats: null,
+      });
     }
 
     const [existingSubmission, playerAggregate] = await Promise.all([

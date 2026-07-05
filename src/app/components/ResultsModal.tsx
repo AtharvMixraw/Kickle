@@ -3,8 +3,8 @@
 import type { CellAnswer } from "@/types/grid";
 import Link from "next/link";
 import { useState } from "react";
+import { authClient } from "@/lib/auth-client";
 
-// 🔁 Replace with your real domain once hosted
 const SITE_URL = "playkickle.vercel.app";
 
 interface ResultsModalProps {
@@ -13,6 +13,8 @@ interface ResultsModalProps {
   score: number;
   answers: CellAnswer[];
   timeTakenSeconds?: number | null;
+  userSession?: { user?: { id: string; name?: string; email?: string } } | null;
+  onSignInPrompt?: () => void;
 }
 
 function buildShareText(score: number, answers: CellAnswer[]): string {
@@ -45,8 +47,14 @@ export default function ResultsModal({
   score,
   answers,
   timeTakenSeconds,
+  userSession,
+  onSignInPrompt,
 }: ResultsModalProps) {
   const [copied, setCopied] = useState(false);
+  const { data: session } = authClient.useSession();
+  
+  // Use passed session prop if available, otherwise use hook
+  const isAuthenticated = userSession?.user || session?.user;
 
   if (!isOpen) return null;
 
@@ -243,13 +251,26 @@ export default function ResultsModal({
 
         {/* Action Buttons */}
         <div className="flex flex-col gap-3">
-          <Link
-            href="/leaderboard"
-            className="w-full h-12 bg-surface-container hover:bg-surface-container-high border-2 border-surface-container-highest hover:border-primary text-white font-bold uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2"
-          >
-            <span>🏆</span>
-            View Leaderboard
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              href="/leaderboard"
+              className="w-full h-12 bg-surface-container hover:bg-surface-container-high border-2 border-surface-container-highest hover:border-primary text-white font-bold uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2"
+            >
+              <span>🏆</span>
+              View Leaderboard
+            </Link>
+          ) : (
+            <button
+              onClick={() => {
+                onClose();
+                onSignInPrompt?.();
+              }}
+              className="w-full h-12 bg-primary hover:bg-opacity-90 text-black font-bold uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2"
+            >
+              <span>🏆</span>
+              See Your Score on Leaderboard
+            </button>
+          )}
 
           <button
             onClick={onClose}

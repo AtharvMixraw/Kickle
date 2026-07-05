@@ -13,10 +13,6 @@ export async function POST(request: NextRequest) {
   try {
     const session = await auth.api.getSession({ headers: request.headers });
 
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const body: SubmitGridRequest & { timeTakenSeconds?: number } = await request.json();
     const { gridId, answers, timeTakenSeconds } = body;
 
@@ -49,15 +45,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Grid not found" }, { status: 404 });
     }
 
-    const existingSubmission = await prisma.gridSubmission.findUnique({
-      where: { userId_gridNumber: { userId: session.user.id, gridNumber: grid.gridNumber } },
-    });
+    // Only check for existing submission if user is authenticated
+    if (session?.user) {
+      const existingSubmission = await prisma.gridSubmission.findUnique({
+        where: { userId_gridNumber: { userId: session.user.id, gridNumber: grid.gridNumber } },
+      });
 
-    if (existingSubmission) {
-      return NextResponse.json(
-        { error: "You have already submitted for this grid" },
-        { status: 400 }
-      );
+      if (existingSubmission) {
+        return NextResponse.json(
+          { error: "You have already submitted for this grid" },
+          { status: 400 }
+        );
+      }
     }
 
     const evaluationPromises = answers.map(async (answer) => {
@@ -109,30 +108,42 @@ export async function POST(request: NextRequest) {
     const evaluations = await Promise.all(evaluationPromises);
     const score = evaluations.filter((e) => e.isCorrect).length;
 
-    const submission = await prisma.gridSubmission.create({
-      data: {
-        userId: session.user.id,
-        gridId: grid.id,
-        gridNumber: grid.gridNumber,
-        gridDate: grid.date,
+    // Only save submission to database if user is authenticated
+    if (session?.user) {
+      const submission = await prisma.gridSubmission.create({
+        data: {
+          userId: session.user.id,
+          gridId: grid.id,
+          gridNumber: grid.gridNumber,
+          gridDate: grid.date,
+          score,
+          timeTakenSeconds:
+            timeTakenSeconds && timeTakenSeconds < 7200 ? timeTakenSeconds : null,
+          answers: { create: evaluations },
+        },
+        include: {
+          answers: { include: { cell: true } },
+        },
+      });
+
+      invalidateLeaderboardCache();
+
+      return NextResponse.json({
+        submission,
         score,
+        answers: submission.answers,
+        timeTakenSeconds: submission.timeTakenSeconds,
+      });
+    } else {
+      // Anonymous submission - return results without saving
+      return NextResponse.json({
+        submission: null,
+        score,
+        answers: evaluations,
         timeTakenSeconds:
           timeTakenSeconds && timeTakenSeconds < 7200 ? timeTakenSeconds : null,
-        answers: { create: evaluations },
-      },
-      include: {
-        answers: { include: { cell: true } },
-      },
-    });
-
-    invalidateLeaderboardCache();
-
-    return NextResponse.json({
-      submission,
-      score,
-      answers: submission.answers,
-      timeTakenSeconds: submission.timeTakenSeconds,
-    });
+      });
+    }
   } catch (error) {
     console.error("Error submitting grid:", error);
     return NextResponse.json({ error: "Failed to submit grid" }, { status: 500 });

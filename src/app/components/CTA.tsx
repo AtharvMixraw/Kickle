@@ -111,7 +111,9 @@ export default function CTA() {
                 <h4 className="font-extrabold text-sm tracking-[0.2em] text-primary">Company</h4>
                 <nav className="flex flex-col gap-4 font-bold text-xs uppercase">
                   <a className="hover:text-primary transition-colors" href="#">About Us</a>
-                  <a className="hover:text-primary transition-colors" href="#">Contact</a>
+                  <a className="hover:text-primary transition-colors" href="mailto:playkickle@gmail.com">
+                    Contact
+                  </a>
                   <button
                     type="button"
                     onClick={() => setActiveLegal("privacy")}
@@ -135,11 +137,7 @@ export default function CTA() {
             <p className="text-on-background/40 text-[10px] font-bold uppercase tracking-widest">
               © 2026 Football Grid Challenge. All rights reserved.
             </p>
-            <div className="flex items-center gap-8">
-              <a aria-label="Twitter" className="text-xs font-extrabold hover:text-primary transition-colors" href="https://x.com/playkickle" target="_blank" rel="noopener noreferrer">TWITTER/X</a>
-              <a aria-label="Instagram" className="text-xs font-extrabold hover:text-primary transition-colors" href="#">INSTAGRAM</a>
-              <a aria-label="Discord" className="text-xs font-extrabold hover:text-primary transition-colors" href="#">DISCORD</a>
-            </div>
+            <a aria-label="Twitter" className="text-xs font-extrabold hover:text-primary transition-colors" href="https://x.com/playkickle" target="_blank" rel="noopener noreferrer">TWITTER/X</a>
           </div>
         </div>
       </footer>

@@ -23,6 +23,7 @@ export default function DashboardPage() {
   const [gridState, setGridState] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const [noGridAvailable, setNoGridAvailable] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerStarted, setTimerStarted] = useState(false);
@@ -108,8 +109,15 @@ export default function DashboardPage() {
   };
 
   const handleSignOut = async () => {
-    await authClient.signOut();
-    router.push("/");
+    try {
+      setSigningOut(true);
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+      await authClient.signOut();
+      router.push("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      setSigningOut(false);
+    }
   };
 
   const startTimer = () => {
@@ -242,6 +250,10 @@ export default function DashboardPage() {
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#36e27b] border-t-transparent"></div>
       </div>
     );
+  }
+
+  if (signingOut) {
+    return <LoadingScreen message="Signing you out..." />;
   }
 
   if (noGridAvailable) {

@@ -24,8 +24,8 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background border-b-2 border-surface-container-highest">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+      <div className="max-w-[92rem] mx-auto px-5 sm:px-8 lg:px-10">
+        <div className="flex items-center justify-between h-24">
           <Link href="/" className="flex items-center gap-3 shrink-0">
             <div className="flex items-center justify-center size-10 bg-primary text-black border-2 border-primary">
               <span className="font-bold">⚽</span>
@@ -35,13 +35,15 @@ export default function Navbar() {
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-10">
+          <nav className="hidden md:flex items-center gap-12">
             <a className="text-sm font-bold font-display hover:text-primary transition-colors" href="#how-it-works">
               How to Play
             </a>
-            <Link className="text-sm font-bold font-display hover:text-primary transition-colors" href="/leaderboard">
-              Leaderboard
-            </Link>
+            {session?.user && (
+              <Link className="text-sm font-bold font-display hover:text-primary transition-colors" href="/leaderboard">
+                Leaderboard
+              </Link>
+            )}
             <a className="text-sm font-bold font-display hover:text-primary transition-colors" href="#prizes">
               Prizes
             </a>

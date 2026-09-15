@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import PlayerInputModal from "../components/PlayerInputModal";
 import LoadingScreen from "../components/LoadingScreen";
+import AnswerValidationLoadingScreen from "../components/AnswerValidationLoadingScreen";
 import ResultsModal from "../components/ResultsModal";
 import AnonymousResultsModal from "../components/AnonymousResultsModal";
 import SignInPromptModal from "../components/SignInPromptModal";
@@ -338,7 +339,7 @@ export default function DashboardPage() {
   });
 
   if (submitting) {
-    return <LoadingScreen />;
+    return <AnswerValidationLoadingScreen />;
   }
 
   const submittedCorrectAnswers = submissionResult?.answers.filter((a) => a.isCorrect).length ?? 0;

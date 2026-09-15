@@ -24,6 +24,18 @@ function evaluateScore(evaluations: EvaluatedAnswer[]) {
   return evaluations.reduce((total, evaluation) => total + evaluation.scoreDelta, 0);
 }
 
+function toCellAnswerRecords(evaluations: EvaluatedAnswer[]) {
+  return evaluations.map(
+    ({ cellId, playerName, isCorrect, llmReasoning, suggestedAnswer }) => ({
+      cellId,
+      playerName,
+      isCorrect,
+      llmReasoning,
+      suggestedAnswer,
+    })
+  );
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth.api.getSession({ headers: request.headers });
@@ -178,7 +190,7 @@ export async function POST(request: NextRequest) {
           score,
           timeTakenSeconds:
             timeTakenSeconds && timeTakenSeconds < 7200 ? timeTakenSeconds : null,
-          answers: { create: evaluations },
+          answers: { create: toCellAnswerRecords(evaluations) },
         },
         include: {
           answers: { include: { cell: true } },

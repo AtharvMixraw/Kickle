@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { validatePlayerAnswer } from "@/lib/grid/validator";
+import { recheckPlayerAnswer, validatePlayerAnswer } from "@/lib/grid/validator";
 import { invalidateLeaderboardCache } from "@/lib/cache/leaderboard-cache";
 import type { SubmitGridRequest } from "@/types/grid";
 
@@ -9,12 +9,27 @@ function normalise(s: string) {
   return s.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+type EvaluatedAnswer = {
+  cellId: string;
+  playerName: string;
+  isCorrect: boolean;
+  llmReasoning: string;
+  suggestedAnswer: string | null;
+  scoreDelta: number;
+  rechecked?: boolean;
+  recheckOutcome?: "confirmed" | "overturned";
+};
+
+function evaluateScore(evaluations: EvaluatedAnswer[]) {
+  return evaluations.reduce((total, evaluation) => total + evaluation.scoreDelta, 0);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth.api.getSession({ headers: request.headers });
 
     const body: SubmitGridRequest & { timeTakenSeconds?: number } = await request.json();
-    const { gridId, answers, timeTakenSeconds } = body;
+    const { gridId, answers, timeTakenSeconds, recheckWrongAnswers = true } = body;
 
     if (!gridId || !answers || answers.length !== 9) {
       return NextResponse.json(
@@ -74,6 +89,7 @@ export async function POST(request: NextRequest) {
           isCorrect: false,
           llmReasoning: "No answer provided.",
           suggestedAnswer: sample || null,
+          scoreDelta: -1,
         };
       }
 
@@ -85,10 +101,11 @@ export async function POST(request: NextRequest) {
           isCorrect: true,
           llmReasoning: `✓ Correct! ${playerName} satisfies both criteria.`,
           suggestedAnswer: null,
+          scoreDelta: 1,
         };
       }
 
-      const evaluation = await validatePlayerAnswer({
+      const initialEvaluation = await validatePlayerAnswer({
         playerName,
         rowType: cell.rowType,
         rowValue: cell.rowValue,
@@ -96,17 +113,59 @@ export async function POST(request: NextRequest) {
         colValue: cell.colValue,
       });
 
+      if (initialEvaluation.isCorrect) {
+        return {
+          cellId: answer.cellId,
+          playerName,
+          isCorrect: true,
+          llmReasoning: initialEvaluation.reasoning,
+          suggestedAnswer: initialEvaluation.suggestedAnswer ?? sample ?? null,
+          scoreDelta: 1,
+          rechecked: false,
+        };
+      }
+
+      if (!recheckWrongAnswers) {
+        return {
+          cellId: answer.cellId,
+          playerName,
+          isCorrect: false,
+          llmReasoning: initialEvaluation.reasoning,
+          suggestedAnswer: initialEvaluation.suggestedAnswer ?? sample ?? null,
+          scoreDelta: -1,
+          rechecked: false,
+        };
+      }
+
+      const recheckedEvaluation = await recheckPlayerAnswer({
+        playerName,
+        rowType: cell.rowType,
+        rowValue: cell.rowValue,
+        colType: cell.colType,
+        colValue: cell.colValue,
+      });
+      const recheckOutcome: EvaluatedAnswer["recheckOutcome"] = recheckedEvaluation.isCorrect
+        ? "overturned"
+        : "confirmed";
+
       return {
         cellId: answer.cellId,
         playerName,
-        isCorrect: evaluation.isCorrect,
-        llmReasoning: evaluation.reasoning,
-        suggestedAnswer: evaluation.suggestedAnswer ?? sample ?? null,
+        isCorrect: recheckedEvaluation.isCorrect,
+        llmReasoning: recheckedEvaluation.isCorrect
+          ? `Rechecked once and overturned: ${recheckedEvaluation.reasoning}`
+          : `Rechecked once: ${recheckedEvaluation.reasoning}`,
+        suggestedAnswer: recheckedEvaluation.suggestedAnswer ?? sample ?? null,
+        scoreDelta: recheckedEvaluation.isCorrect ? 1 : -1,
+        rechecked: true,
+        recheckOutcome,
       };
     });
 
     const evaluations = await Promise.all(evaluationPromises);
-    const score = evaluations.filter((e) => e.isCorrect).length;
+    const score = evaluateScore(evaluations);
+    const correctAnswers = evaluations.filter((e) => e.isCorrect).length;
+    const wrongAnswers = evaluations.length - correctAnswers;
 
     // Only save submission to database if user is authenticated
     if (session?.user) {
@@ -129,9 +188,14 @@ export async function POST(request: NextRequest) {
       invalidateLeaderboardCache();
 
       return NextResponse.json({
-        submission,
+        submission: {
+          ...submission,
+          answers: evaluations,
+        },
         score,
-        answers: submission.answers,
+        correctAnswers,
+        wrongAnswers,
+        answers: evaluations,
         timeTakenSeconds: submission.timeTakenSeconds,
       });
     } else {
@@ -139,6 +203,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         submission: null,
         score,
+        correctAnswers,
+        wrongAnswers,
         answers: evaluations,
         timeTakenSeconds:
           timeTakenSeconds && timeTakenSeconds < 7200 ? timeTakenSeconds : null,

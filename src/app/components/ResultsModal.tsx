@@ -4,9 +4,8 @@ import type { CellAnswer } from "@/types/grid";
 import Link from "next/link";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { SITE_URL } from "@/lib/site-url";
 import NextGridCountdown from "./NextGridCountdown";
-
-const SITE_URL = "playkickle.vercel.app";
 
 interface ResultsModalProps {
   isOpen: boolean;
@@ -31,7 +30,7 @@ function buildShareText(score: number, answers: CellAnswer[]): string {
     rows[1],
     rows[2],
     ``,
-    `${score}/9 — Can you beat me?`,
+    `${score} points — Can you beat me?`,
     `${SITE_URL}`,
   ].join("\n");
 }
@@ -60,6 +59,7 @@ export default function ResultsModal({
   if (!isOpen) return null;
 
   const correctAnswers = answers.filter((a) => a.isCorrect).length;
+  const wrongAnswers = answers.length - correctAnswers;
   const percentage = Math.round((correctAnswers / 9) * 100);
 
   const handleShare = async () => {
@@ -105,15 +105,15 @@ export default function ResultsModal({
           <h2 className="text-3xl font-extrabold text-white mb-2">
             {percentage >= 80 ? "Amazing!" : percentage >= 60 ? "Great Job!" : percentage >= 40 ? "Not Bad!" : "Keep Practicing!"}
           </h2>
-          <p className="text-gray-400">You got {correctAnswers} out of 9 correct</p>
+          <p className="text-gray-400">Wrong answers: {wrongAnswers}</p>
         </div>
 
         {/* Score + Time */}
         <div className="bg-surface-container p-6 mb-6 border-2 border-surface-container-highest">
           <div className="flex items-center gap-6 mb-4">
             <div>
-              <p className="text-gray-400 text-xs font-medium mb-1">Score</p>
-              <span className="text-4xl font-bold text-[#36e27b]">{score}/9</span>
+              <p className="text-gray-400 text-xs font-medium mb-1">Final Score</p>
+              <span className="text-4xl font-bold text-[#36e27b]">{score}</span>
             </div>
             {timeTakenSeconds != null && (
               <div className="border-l border-white/10 pl-6">
@@ -178,77 +178,102 @@ export default function ResultsModal({
             Your Answers
           </h3>
           <div className="flex flex-col gap-3">
-            {answers.map((answer, idx) => (
-              <div
-                key={answer.id}
-                className={`border-2 ${
-                  answer.isCorrect
-                    ? "bg-primary/10 border-primary/60"
-                    : "bg-red-900/20 border-red-400/50"
-                }`}
-              >
-                <div className="flex items-center justify-between p-3">
-                  <div className="flex items-center gap-3 flex-1">
-                    <span className={`font-bold text-sm ${answer.isCorrect ? "text-[#36e27b]" : "text-red-400"}`}>
-                      Cell {idx + 1}
-                    </span>
-                    <span className="text-white font-medium truncate">{answer.playerName}</span>
-                  </div>
-                  <div className={`w-6 h-6 flex items-center justify-center flex-shrink-0 ${answer.isCorrect ? "bg-primary" : "bg-red-500"}`}>
-                    {answer.isCorrect ? (
-                      <svg className="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    ) : (
-                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                  </div>
-                </div>
+            {answers.map((answer, idx) => {
+              const wasRechecked = Boolean(
+                answer.rechecked || answer.llmReasoning?.toLowerCase().includes("rechecked once")
+              );
 
-                {answer.llmReasoning && (
-                  <div className="px-3 pb-3">
-                    <div className={`text-sm p-3 border ${answer.isCorrect ? "bg-green-900/30 text-green-100 border-primary/30" : "bg-red-900/30 text-red-100 border-red-500/30"}`}>
-                      <div className="flex items-start gap-2">
-                        <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                        </svg>
-                        <p className="leading-relaxed">{answer.llmReasoning}</p>
-                      </div>
+              return (
+                <div
+                  key={answer.id}
+                  className={`border-2 ${
+                    answer.isCorrect
+                      ? "bg-primary/10 border-primary/60"
+                      : "bg-red-900/20 border-red-400/50"
+                  }`}
+                >
+                  <div className="flex items-center justify-between p-3">
+                    <div className="flex items-center gap-3 flex-1">
+                      <span className={`font-bold text-sm ${answer.isCorrect ? "text-[#36e27b]" : "text-red-400"}`}>
+                        Cell {idx + 1}
+                      </span>
+                      <span className="text-white font-medium truncate">{answer.playerName}</span>
+                      {!answer.isCorrect && wasRechecked && (
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-yellow-300 border border-yellow-500/40 bg-yellow-500/10 px-2 py-0.5">
+                          Rechecked
+                        </span>
+                      )}
                     </div>
+                    <div className={`w-6 h-6 flex items-center justify-center flex-shrink-0 ${answer.isCorrect ? "bg-primary" : "bg-red-500"}`}>
+                      {answer.isCorrect ? (
+                        <svg className="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
 
-                    {!answer.isCorrect && answer.suggestedAnswer && (
-                      <div className="mt-2 p-3 bg-blue-900/30 border border-blue-500/30">
+                  {answer.llmReasoning && (
+                    <div className="px-3 pb-3">
+                      <div className={`text-sm p-3 border ${answer.isCorrect ? "bg-green-900/30 text-green-100 border-primary/30" : "bg-red-900/30 text-red-100 border-red-500/30"}`}>
                         <div className="flex items-start gap-2">
-                          <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                           </svg>
-                          <div>
-                            <p className="text-xs text-blue-300 font-semibold mb-1">Correct Answer:</p>
-                            <p className="text-sm text-blue-100 font-medium">{answer.suggestedAnswer}</p>
-                          </div>
+                          <p className="leading-relaxed">{answer.llmReasoning}</p>
                         </div>
                       </div>
-                    )}
 
-                    {!answer.isCorrect && !answer.suggestedAnswer && answer.llmReasoning?.toLowerCase().includes("impossible") && (
-                      <div className="mt-2 p-3 bg-yellow-900/30 border border-yellow-500/30">
-                        <div className="flex items-start gap-2">
-                          <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                          </svg>
-                          <div>
-                            <p className="text-xs text-yellow-300 font-semibold mb-1">⚠️ Impossible Combination</p>
-                            <p className="text-xs text-yellow-100">No player can satisfy these criteria together.</p>
+                      {!answer.isCorrect && wasRechecked && (
+                        <div className="mt-2 p-3 bg-yellow-900/20 border border-yellow-500/30">
+                          <p className="text-xs text-yellow-300 font-semibold uppercase tracking-wider mb-1">
+                            Rechecked once
+                          </p>
+                          <p className="text-sm text-yellow-100">
+                            We sent this answer through the model again before locking in the result.
+                          </p>
+                        </div>
+                      )}
+
+                      {!answer.isCorrect && answer.suggestedAnswer && (
+                        <div className="mt-2 p-3 bg-blue-900/30 border border-blue-500/30">
+                          <div className="flex items-start gap-2">
+                            <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                            </svg>
+                            <div>
+                              <p className="text-xs text-blue-300 font-semibold mb-1">Correct Answer:</p>
+                              <p className="text-sm text-blue-100 font-medium">{answer.suggestedAnswer}</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
+                      )}
+
+                      {!answer.isCorrect && !answer.suggestedAnswer && answer.llmReasoning?.toLowerCase().includes("impossible") && (
+                        <div className="mt-2 p-3 bg-yellow-900/30 border border-yellow-500/30">
+                          <div className="flex items-start gap-2">
+                            <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                            <div>
+                              <p className="text-xs text-yellow-300 font-semibold mb-1">⚠️ Impossible Combination</p>
+                              <p className="text-xs text-yellow-100">No player can satisfy these criteria together.</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-4 text-xs font-bold uppercase tracking-wider text-gray-400">
+            {correctAnswers} correct · {wrongAnswers} wrong · score = correct - wrong
           </div>
         </div>
 

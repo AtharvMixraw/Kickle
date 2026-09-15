@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
 
 interface SignInPromptModalProps {
   isOpen: boolean;
@@ -16,7 +15,6 @@ export default function SignInPromptModal({
   score,
 }: SignInPromptModalProps) {
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const router = useRouter();
 
   const handleSignIn = async () => {
     setIsSigningIn(true);
@@ -41,7 +39,7 @@ export default function SignInPromptModal({
             Awesome Score!
           </h2>
           <div className="text-5xl font-bold text-white mb-2">
-            {score}/9
+            {score} pts
           </div>
           <p className="text-on-background text-sm leading-relaxed">
             Sign in to see your score on the leaderboard and track your progress!

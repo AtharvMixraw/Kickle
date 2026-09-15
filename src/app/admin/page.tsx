@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CLUBS, COUNTRIES, AWARDS } from "@/lib/grid/constants";
 import type { ClubName, CountryName, AwardName } from "@/types/grid";
+import LoadingScreen from "../components/LoadingScreen";
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
@@ -206,11 +207,7 @@ export default function AdminPage() {
   };
 
   if (isPending) {
-    return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#36e27b] border-t-transparent" />
-      </div>
-    );
+    return <LoadingScreen message="Loading admin" />;
   }
 
   if (!session || session.user.email !== ADMIN_EMAIL) return null;

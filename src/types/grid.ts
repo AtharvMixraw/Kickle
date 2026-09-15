@@ -74,6 +74,9 @@ export interface CellAnswer {
   isCorrect: boolean;
   llmReasoning?: string;
   suggestedAnswer?: string | null;
+  scoreDelta?: number;
+  rechecked?: boolean;
+  recheckOutcome?: "confirmed" | "overturned";
 }
 
 // User's submission
@@ -119,11 +122,14 @@ export interface SubmitGridRequest {
     cellId: string;
     playerName: string;
   }[];
+  recheckWrongAnswers?: boolean;
 }
 
 export interface SubmitGridResponse {
   submission: GridSubmission;
   score: number;
+  correctAnswers: number;
+  wrongAnswers: number;
   answers: CellAnswer[];
 }
 

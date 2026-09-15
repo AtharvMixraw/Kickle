@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import LoadingScreen from "../components/LoadingScreen";
 
 interface LeaderboardEntry {
   id: string;
@@ -54,14 +55,7 @@ export default function LeaderboardPage() {
   const myEntry = leaderboard.find((e) => e.id === currentUserId);
 
   if (isPending || loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent" />
-          <p className="text-on-background/60 text-xs tracking-[0.2em] font-bold uppercase">Loading Leaderboard</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading leaderboard" />;
   }
 
   if (!session?.user) return null;

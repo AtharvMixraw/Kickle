@@ -79,13 +79,22 @@ export default function Navbar() {
                 </Link>
               </>
             ) : (
-              <button
-                onClick={handleGoogleSignIn}
-                className="flex items-center gap-2 bg-primary text-black px-6 py-2.5 font-bold font-display text-sm transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 hard-shadow"
-              >
-                <span className="hidden sm:inline">Sign In</span>
-                <span className="sm:hidden">Sign In</span>
-              </button>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 border-2 border-white/30 bg-white/5 text-white px-4 sm:px-5 py-2.5 font-bold font-display text-sm transition-all hover:border-primary hover:text-primary hover:bg-primary/10"
+                >
+                  <span className="hidden sm:inline">Try Anonymous</span>
+                  <span className="sm:hidden">Anon</span>
+                </Link>
+                <button
+                  onClick={handleGoogleSignIn}
+                  className="flex items-center gap-2 bg-primary text-black px-6 py-2.5 font-bold font-display text-sm transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 hard-shadow"
+                >
+                  <span className="hidden sm:inline">Sign In</span>
+                  <span className="sm:hidden">Sign In</span>
+                </button>
+              </div>
             )}
           </div>
         </div>

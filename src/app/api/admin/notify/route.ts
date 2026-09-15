@@ -3,10 +3,10 @@ import { Resend } from "resend";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { GridLiveEmail } from "@/emails/GridLiveEmail";
+import { SITE_URL } from "@/lib/site-url";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://footballgrid.vercel.app";
 const FROM_EMAIL = process.env.FROM_EMAIL || "Football Grid <noreply@yourdomain.com>";
 const IS_TEST_MODE = FROM_EMAIL === "onboarding@resend.dev";
 

@@ -24,6 +24,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [recheckWrongAnswers, setRecheckWrongAnswers] = useState(true);
   const [noGridAvailable, setNoGridAvailable] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerStarted, setTimerStarted] = useState(false);
@@ -38,6 +39,8 @@ export default function DashboardPage() {
   const [submissionResult, setSubmissionResult] = useState<{
     score: number;
     answers: CellAnswer[];
+    correctAnswers: number;
+    wrongAnswers: number;
     timeTakenSeconds?: number | null;
   } | null>(null);
 
@@ -82,11 +85,15 @@ export default function DashboardPage() {
 
       if (data.userSubmission) {
         setExistingSubmission(data.userSubmission);
+        const existingCorrectAnswers = data.userSubmission.answers.filter((answer: CellAnswer) => answer.isCorrect).length;
+        const existingWrongAnswers = data.userSubmission.answers.length - existingCorrectAnswers;
 
         // Populate submissionResult from existing submission so "View Results" works
         setSubmissionResult({
           score: data.userSubmission.score,
           answers: data.userSubmission.answers,
+          correctAnswers: existingCorrectAnswers,
+          wrongAnswers: existingWrongAnswers,
           timeTakenSeconds: data.userSubmission.timeTakenSeconds ?? null,
         });
 
@@ -208,6 +215,7 @@ export default function DashboardPage() {
           gridId: grid.id,
           answers,
           timeTakenSeconds: timerSeconds,
+          recheckWrongAnswers,
         }),
       });
 
@@ -220,6 +228,8 @@ export default function DashboardPage() {
       setSubmissionResult({
         score: result.score,
         answers: result.answers,
+        correctAnswers: result.correctAnswers,
+        wrongAnswers: result.wrongAnswers,
         timeTakenSeconds: result.timeTakenSeconds ?? timerSeconds,
       });
       setExistingSubmission(result.submission);
@@ -245,11 +255,7 @@ export default function DashboardPage() {
   };
 
   if (isPending || loading) {
-    return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#36e27b] border-t-transparent"></div>
-      </div>
-    );
+    return <LoadingScreen message="Loading dashboard" />;
   }
 
   if (signingOut) {
@@ -335,6 +341,9 @@ export default function DashboardPage() {
     return <LoadingScreen />;
   }
 
+  const submittedCorrectAnswers = submissionResult?.answers.filter((a) => a.isCorrect).length ?? 0;
+  const submittedWrongAnswers = submissionResult ? submissionResult.answers.length - submittedCorrectAnswers : 0;
+
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans flex overflow-hidden">
       {/* Left Sidebar - only show if authenticated */}
@@ -366,7 +375,10 @@ export default function DashboardPage() {
             <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
             <div className="bg-gradient-to-br from-[#36e27b]/10 to-[#36e27b]/5 p-5 rounded-2xl border border-[#36e27b]/30 backdrop-blur-sm">
               <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider font-semibold">Your Score</p>
-              <p className="text-4xl font-black text-[#36e27b]">{existingSubmission.score}<span className="text-xl text-gray-400">/9</span></p>
+              <p className="text-4xl font-black text-[#36e27b]">{existingSubmission.score}</p>
+              <p className="text-xs text-gray-400 mt-2 uppercase tracking-wider font-semibold">
+                +1 per correct, -1 per wrong
+              </p>
             </div>
           </>
         )}
@@ -552,6 +564,20 @@ export default function DashboardPage() {
 
           {!existingSubmission && (
             <div className="mt-10 sm:mt-12 flex flex-col items-center gap-5 w-full max-w-sm px-4">
+              <label className="w-full flex items-start gap-3 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-left cursor-pointer hover:border-[#36e27b]/50 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={recheckWrongAnswers}
+                  onChange={(event) => setRecheckWrongAnswers(event.target.checked)}
+                  className="mt-1 size-4 accent-[#36e27b]"
+                />
+                <span className="block">
+                  <span className="block text-sm font-bold text-white">Double-check wrong answers</span>
+                  <span className="block text-xs text-gray-400 mt-1">
+                    Uses the latest web-search model for a second pass. Turn it off to send your answers as-is.
+                  </span>
+                </span>
+              </label>
               <button
                 onClick={handleSubmitGrid}
                 disabled={submitting || Object.keys(gridState).length === 0}
@@ -643,6 +669,8 @@ export default function DashboardPage() {
             router.push("/");
           }}
           score={submissionResult.score}
+          correctAnswers={submittedCorrectAnswers}
+          wrongAnswers={submittedWrongAnswers}
           onViewDetails={() => {
             setShowAnonymousResults(false);
             setShowResults(true);

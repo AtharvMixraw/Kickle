@@ -1,4 +1,4 @@
-import { openai, DEFAULT_MODEL, VALIDATION_SYSTEM_PROMPT } from "@/lib/openai";
+import { openai, DEFAULT_MODEL, RECHECK_MODEL, VALIDATION_SYSTEM_PROMPT } from "@/lib/openai";
 import type { LLMEvaluationResult } from "@/types/grid";
 
 interface ValidatePlayerParams {
@@ -15,10 +15,30 @@ interface ValidatePlayerParams {
 export async function validatePlayerAnswer(
   params: ValidatePlayerParams
 ): Promise<LLMEvaluationResult> {
+  return validatePlayerAnswerWithModel(params, DEFAULT_MODEL, buildValidationPrompt);
+}
+
+export async function recheckPlayerAnswer(
+  params: ValidatePlayerParams
+): Promise<LLMEvaluationResult> {
+  return validatePlayerAnswerWithWebSearch(params);
+}
+
+async function validatePlayerAnswerWithModel(
+  params: ValidatePlayerParams,
+  model: string,
+  buildPrompt: (
+    playerName: string,
+    rowType: string,
+    rowValue: string,
+    colType: string,
+    colValue: string
+  ) => string
+): Promise<LLMEvaluationResult> {
   const { playerName, rowType, rowValue, colType, colValue } = params;
 
   // Build the validation prompt
-  const userPrompt = buildValidationPrompt(
+  const userPrompt = buildPrompt(
     playerName,
     rowType,
     rowValue,
@@ -28,7 +48,7 @@ export async function validatePlayerAnswer(
 
   try {
     const response = await openai.chat.completions.create({
-      model: DEFAULT_MODEL,
+      model,
       messages: [
         {
           role: "system",
@@ -68,6 +88,77 @@ export async function validatePlayerAnswer(
   }
 }
 
+async function validatePlayerAnswerWithWebSearch(
+  params: ValidatePlayerParams
+): Promise<LLMEvaluationResult> {
+  const { playerName, rowType, rowValue, colType, colValue } = params;
+
+  const userPrompt = `${buildRecheckPrompt(
+    playerName,
+    rowType,
+    rowValue,
+    colType,
+    colValue
+  )}
+
+Use live web search to verify the player's club, nationality, and award history if needed. Search current sources and return only the JSON object.`;
+
+  try {
+    const response = await openai.responses.create({
+      model: RECHECK_MODEL,
+      tools: [{ type: "web_search" }],
+      input: [
+        {
+          role: "system",
+          content: VALIDATION_SYSTEM_PROMPT,
+        },
+        {
+          role: "user",
+          content: userPrompt,
+        },
+      ],
+      text: {
+        format: {
+          type: "json_schema",
+          name: "grid_recheck_result",
+          strict: true,
+          schema: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              isCorrect: { type: "boolean" },
+              reasoning: { type: "string" },
+              suggestedAnswer: { anyOf: [{ type: "string" }, { type: "null" }] },
+            },
+            required: ["isCorrect", "reasoning", "suggestedAnswer"],
+          },
+        },
+      },
+    });
+
+    const content = response.output_text;
+
+    if (!content) {
+      throw new Error("No response from OpenAI");
+    }
+
+    const result = JSON.parse(content) as LLMEvaluationResult;
+
+    if (typeof result.isCorrect !== "boolean" || typeof result.reasoning !== "string") {
+      throw new Error("Invalid response format from OpenAI");
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Error rechecking player answer:", error);
+
+    return {
+      isCorrect: false,
+      reasoning: `Error during recheck: ${error instanceof Error ? error.message : "Unknown error"}`,
+    };
+  }
+}
+
 /**
  * Build the validation prompt based on criteria types
  */
@@ -91,6 +182,28 @@ The player must satisfy BOTH criteria to be correct.
 Respond with JSON containing:
 - isCorrect: true if BOTH criteria are met, false otherwise
 - reasoning: Brief explanation of why (mention which criteria are met/not met)`;
+}
+
+function buildRecheckPrompt(
+  playerName: string,
+  rowType: string,
+  rowValue: string,
+  colType: string,
+  colValue: string
+): string {
+  const rowCriteria = formatCriteria(rowType, rowValue);
+  const colCriteria = formatCriteria(colType, colValue);
+
+  return `This is a second-pass verification for the player "${playerName}".
+
+Re-evaluate ONLY these two criteria independently and ignore any earlier verdict:
+Criteria 1: ${rowCriteria}
+Criteria 2: ${colCriteria}
+
+Return the same JSON shape as before:
+- isCorrect: true if BOTH criteria are met, false otherwise
+- reasoning: Concise factual explanation
+- suggestedAnswer: a correct player name if the answer is wrong and the combination is possible, otherwise null`;
 }
 
 /**

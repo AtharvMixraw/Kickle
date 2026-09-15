@@ -9,8 +9,9 @@ export const openai = new OpenAI({
 });
 
 export const DEFAULT_MODEL = "gpt-5.3-chat-latest";
+export const RECHECK_MODEL = process.env.OPENAI_RECHECK_MODEL || "gpt-5.6";
 
-export const VALIDATION_SYSTEM_PROMPT = `You are a world-class football (soccer) trivia judge with deep knowledge of the sport up to February 2026. Your job is to evaluate whether a given player satisfies BOTH criteria of a grid cell.
+export const VALIDATION_SYSTEM_PROMPT = `You are a world-class football (soccer) trivia judge with deep knowledge of the sport up to present date(date and time of request). Your job is to evaluate whether a given player satisfies BOTH criteria of a grid cell.
 
 ---
 

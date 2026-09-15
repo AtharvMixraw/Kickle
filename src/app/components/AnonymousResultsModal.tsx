@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
 import NextGridCountdown from "./NextGridCountdown";
 
 interface AnonymousResultsModalProps {
   isOpen: boolean;
   score: number;
+  correctAnswers: number;
+  wrongAnswers: number;
   onViewDetails: () => void;
   onSkipForNow: () => void;
 }
@@ -14,27 +14,12 @@ interface AnonymousResultsModalProps {
 export default function AnonymousResultsModal({
   isOpen,
   score,
+  correctAnswers,
+  wrongAnswers,
   onViewDetails,
   onSkipForNow,
 }: AnonymousResultsModalProps) {
-  const [isSigningIn, setIsSigningIn] = useState(false);
-
-  const correctAnswers = score;
-  const percentage = Math.round((score / 9) * 100);
-
-  const handleViewDetails = async () => {
-    setIsSigningIn(true);
-    try {
-      await authClient.signIn.social({
-        provider: "google",
-        callbackURL: "/dashboard",
-      });
-      onViewDetails();
-    } catch (error) {
-      console.error("Sign in failed:", error);
-      setIsSigningIn(false);
-    }
-  };
+  const percentage = Math.round((correctAnswers / 9) * 100);
 
   if (!isOpen) return null;
 
@@ -57,9 +42,8 @@ export default function AnonymousResultsModal({
         <div className="bg-surface-container p-6 mb-6 border-2 border-surface-container-highest">
           <div className="flex flex-col items-center gap-4">
             <div className="text-center">
-              <p className="text-gray-400 text-xs font-medium mb-2">Your Score</p>
+              <p className="text-gray-400 text-xs font-medium mb-2">Final Score</p>
               <span className="text-5xl font-bold text-primary">{score}</span>
-              <span className="text-2xl text-gray-400">/9</span>
             </div>
             <div className="w-full bg-surface-container-high h-3 overflow-hidden border border-surface-container-highest">
               <div
@@ -67,7 +51,7 @@ export default function AnonymousResultsModal({
                 style={{ width: `${percentage}%` }}
               />
             </div>
-            <p className="text-gray-400 text-sm">{correctAnswers} correct answers</p>
+            <p className="text-gray-400 text-sm">{wrongAnswers} wrong answers</p>
           </div>
         </div>
 
@@ -76,18 +60,17 @@ export default function AnonymousResultsModal({
         {/* Call to Action */}
         <div className="mb-4">
           <p className="text-on-background text-sm text-center mb-4">
-            Sign in to see detailed feedback on each answer and track your progress on the leaderboard!
+            Wrong answers are rechecked automatically. Open the detailed report to see the full breakdown for every cell.
           </p>
         </div>
 
         {/* Action Buttons */}
         <div className="space-y-3">
           <button
-            onClick={handleViewDetails}
-            disabled={isSigningIn}
+            onClick={onViewDetails}
             className="w-full bg-primary text-background font-bold py-3 px-4 uppercase tracking-wider hover:bg-opacity-90 disabled:opacity-50 transition-all"
           >
-            {isSigningIn ? "Signing in..." : "View Detailed Report"}
+            View Detailed Report
           </button>
 
           <button
@@ -99,7 +82,7 @@ export default function AnonymousResultsModal({
         </div>
 
         <p className="text-xs text-outline mt-4 text-center">
-          You can play again tomorrow or sign in anytime to see your detailed results.
+          You can play again tomorrow or sign in anytime to see the leaderboard.
         </p>
       </div>
     </div>

@@ -36,6 +36,19 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to see the app.
 
+## Production domain
+
+The canonical production URL is `https://playkickle.online`; `https://www.playkickle.online` is also accepted for authentication. In Vercel, add both domains to the project and set these production environment variables:
+
+```bash
+BETTER_AUTH_URL=https://playkickle.online
+NEXT_PUBLIC_BETTER_AUTH_URL=https://playkickle.online
+NEXT_PUBLIC_SITE_URL=https://playkickle.online
+BETTER_AUTH_TRUSTED_ORIGINS=https://playkickle.online,https://www.playkickle.online
+```
+
+In the Google Cloud OAuth client, add `https://playkickle.online/api/auth/callback/google` as an authorized redirect URI. If you configure Google to return through `www`, also add `https://www.playkickle.online/api/auth/callback/google`.
+
 ## Daily Grid Automation
 
 The app now includes a shared daily-grid creator that can be triggered in three ways:

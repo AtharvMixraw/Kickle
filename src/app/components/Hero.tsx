@@ -3,6 +3,8 @@
 import Navbar from './Navbar';
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
+import Image from "next/image";
+import mainPageBackground from "../../../assets/main_page_bg.png";
 
 export default function Hero() {
   const { data: session } = authClient.useSession();
@@ -19,8 +21,19 @@ export default function Hero() {
       <Navbar />
 
       <div className="max-w-[92rem] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-24">
-        <div className="grid lg:grid-cols-12 gap-0 border-2 border-surface-container-highest">
-          <div className="lg:col-span-12 p-8 sm:p-12 flex flex-col justify-center">
+        <div className="relative isolate grid min-h-[600px] overflow-hidden border-2 border-surface-container-highest sm:min-h-[660px] lg:grid-cols-12">
+          <Image
+            src={mainPageBackground}
+            alt=""
+            fill
+            priority
+            sizes="(max-width: 1024px) 100vw, 92vw"
+            className="-z-20 object-cover object-[66%_center] opacity-80"
+          />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-background via-background/90 to-background/20" />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-t from-background via-transparent to-background/25" />
+
+          <div className="relative z-10 lg:col-span-12 p-8 sm:p-12 flex flex-col justify-center">
             <div className="inline-flex items-center gap-2 text-primary text-xs font-bold uppercase tracking-[0.2em] mb-6">
               <span className="w-3 h-3 bg-primary" />
               Live Challenge

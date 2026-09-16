@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Syne, Hanken_Grotesk } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import footballIcon from "../../assets/football.png";
 import "./globals.css";
 
 const syne = Syne({
@@ -18,6 +19,9 @@ const hankenGrotesk = Hanken_Grotesk({
 export const metadata: Metadata = {
   title: "Kickle",
   description: "Show your ball knowledge and play Kickle",
+  icons: {
+    icon: footballIcon.src,
+  },
 };
 
 export default function RootLayout({

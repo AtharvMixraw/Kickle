@@ -111,7 +111,19 @@ export async function generateDailyGrid(date: Date, gridNumber: number) {
   }
 
   if (!rowCriteria || !colCriteria) {
-    throw new Error("Could not generate a valid grid combination. Try again.");
+    // The random pool is intentionally strict: every one of the nine cells
+    // must have a known answer. Use a verified fallback rather than allowing
+    // a failed random draw to skip an entire daily grid.
+    rowCriteria = [
+      { type: "club", value: "Barcelona" },
+      { type: "club", value: "Paris Saint-Germain" },
+      { type: "award", value: "Ballon d'Or" },
+    ];
+    colCriteria = [
+      { type: "country", value: "Argentina" },
+      { type: "country", value: "Brazil" },
+      { type: "award", value: "UCL" },
+    ];
   }
 
   // Create grid with cells

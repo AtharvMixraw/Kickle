@@ -7,12 +7,14 @@ interface SignInPromptModalProps {
   isOpen: boolean;
   onClose: () => void;
   score: number;
+  callbackURL?: string;
 }
 
 export default function SignInPromptModal({
   isOpen,
   onClose,
   score,
+  callbackURL = "/leaderboard",
 }: SignInPromptModalProps) {
   const [isSigningIn, setIsSigningIn] = useState(false);
 
@@ -21,7 +23,7 @@ export default function SignInPromptModal({
     try {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/leaderboard",
+        callbackURL,
       });
     } catch (error) {
       console.error("Sign in failed:", error);

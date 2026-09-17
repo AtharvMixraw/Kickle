@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { createOrGetDailyGrid } from "@/lib/grid/scheduler";
+
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
 export async function POST(request: NextRequest) {
   try {
-    // Simple security: check for a secret key
-    const authHeader = request.headers.get("authorization");
-    const adminSecret = process.env.ADMIN_SECRET || "change-me-in-production";
+    const session = await auth.api.getSession({ headers: request.headers });
 
-    if (authHeader !== `Bearer ${adminSecret}`) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+    if (!session?.user || !ADMIN_EMAIL || session.user.email !== ADMIN_EMAIL) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const body = await request.json();
@@ -26,9 +24,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error seeding grid:", error);
-    return NextResponse.json(
-      { error: "Failed to create grid" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create grid" }, { status: 500 });
   }
 }

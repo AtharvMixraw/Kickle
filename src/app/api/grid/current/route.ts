@@ -3,36 +3,37 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { getLeagueTier } from "@/lib/league";
 
+const publicCellSelect = {
+  id: true,
+  gridId: true,
+  row: true,
+  col: true,
+  rowType: true,
+  rowValue: true,
+  colType: true,
+  colValue: true,
+} as const;
+
 export async function GET(request: NextRequest) {
   try {
-    // Get authenticated user (optional for anonymous play)
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const session = await auth.api.getSession({ headers: request.headers });
 
-    // Find the latest active grid (by gridNumber)
     const grid = await prisma.grid.findFirst({
-      where: {
-        isActive: true,
-      },
-      orderBy: {
-        gridNumber: "desc",
-      },
+      where: { isActive: true },
+      orderBy: { gridNumber: "desc" },
       include: {
         cells: {
           orderBy: [{ row: "asc" }, { col: "asc" }],
+          // Keep server-side answer hints out of all player-facing payloads.
+          select: publicCellSelect,
         },
       },
     });
 
     if (!grid) {
-      return NextResponse.json(
-        { error: "No active grid found for today" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "No active grid found" }, { status: 404 });
     }
 
-    // Only fetch user-specific data if authenticated
     if (!session?.user) {
       return NextResponse.json({
         grid,
@@ -52,22 +53,14 @@ export async function GET(request: NextRequest) {
         },
         include: {
           answers: {
-            include: {
-              cell: true,
-            },
+            include: { cell: { select: publicCellSelect } },
           },
         },
       }),
       prisma.gridSubmission.aggregate({
-        where: {
-          userId: session.user.id,
-        },
-        _sum: {
-          score: true,
-        },
-        _count: {
-          id: true,
-        },
+        where: { userId: session.user.id },
+        _sum: { score: true },
+        _count: { id: true },
       }),
     ]);
 
@@ -86,9 +79,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error fetching current grid:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch grid" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch grid" }, { status: 500 });
   }
 }

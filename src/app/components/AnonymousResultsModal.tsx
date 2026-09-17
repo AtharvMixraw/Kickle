@@ -77,7 +77,7 @@ export default function AnonymousResultsModal({
             onClick={onSkipForNow}
             className="w-full border-2 border-outline text-on-background font-bold py-3 px-4 uppercase tracking-wider hover:border-primary hover:text-primary transition-all"
           >
-            Skip for Now
+            Back to Home
           </button>
         </div>
 

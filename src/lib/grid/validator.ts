@@ -47,9 +47,9 @@ async function validatePlayerAnswerWithModel(
   );
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await openai.responses.create({
       model,
-      messages: [
+      input: [
         {
           role: "system",
           content: VALIDATION_SYSTEM_PROMPT,
@@ -59,11 +59,26 @@ async function validatePlayerAnswerWithModel(
           content: userPrompt,
         },
       ],
-      // temperature: 0.1, // Low temperature for consistency
-      response_format: { type: "json_object" },
+      text: {
+        format: {
+          type: "json_schema",
+          name: "grid_validation_result",
+          strict: true,
+          schema: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              isCorrect: { type: "boolean" },
+              reasoning: { type: "string" },
+              suggestedAnswer: { anyOf: [{ type: "string" }, { type: "null" }] },
+            },
+            required: ["isCorrect", "reasoning", "suggestedAnswer"],
+          },
+        },
+      },
     });
 
-    const content = response.choices[0]?.message?.content;
+    const content = response.output_text;
     
     if (!content) {
       throw new Error("No response from OpenAI");

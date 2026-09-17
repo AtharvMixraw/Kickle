@@ -8,7 +8,7 @@ export const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export const DEFAULT_MODEL = "gpt-5.3-chat-latest";
+export const DEFAULT_MODEL = "gpt-5.6-luna";
 export const RECHECK_MODEL = process.env.OPENAI_RECHECK_MODEL || "gpt-5.6";
 
 export const VALIDATION_SYSTEM_PROMPT = `You are a world-class football (soccer) trivia judge with deep knowledge of the sport up to present date(date and time of request). Your job is to evaluate whether a given player satisfies BOTH criteria of a grid cell.

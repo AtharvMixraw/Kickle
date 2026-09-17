@@ -37,6 +37,7 @@ export default function DashboardPage() {
   const [showAnonymousResults, setShowAnonymousResults] = useState(false);
   const [showPartialWarning, setShowPartialWarning] = useState(false);
   const [showSignInPrompt, setShowSignInPrompt] = useState(false);
+  const [signInToReplay, setSignInToReplay] = useState(false);
   const [submissionResult, setSubmissionResult] = useState<{
     score: number;
     answers: CellAnswer[];
@@ -47,11 +48,14 @@ export default function DashboardPage() {
 
   // Existing submission
   const [existingSubmission, setExistingSubmission] = useState<GridSubmission | null>(null);
+  const [anonymousSubmissionComplete, setAnonymousSubmissionComplete] = useState(false);
   const [playerStats, setPlayerStats] = useState<{
     totalScore: number;
     gamesPlayed: number;
     league: LeagueTier;
   } | null>(null);
+
+  const hasCompletedGrid = Boolean(existingSubmission) || (!session?.user && anonymousSubmissionComplete);
 
   useEffect(() => {
     if (isPending) return;
@@ -83,6 +87,9 @@ export default function DashboardPage() {
       const data = await response.json();
       setGrid(data.grid);
       setPlayerStats(data.playerStats ?? null);
+      setAnonymousSubmissionComplete(
+        !session?.user && localStorage.getItem(`kickle_anonymous_submission_${data.grid.gridNumber}`) === "true"
+      );
 
       if (data.userSubmission) {
         setExistingSubmission(data.userSubmission);
@@ -145,7 +152,7 @@ export default function DashboardPage() {
   };
 
   const handleCellClick = (row: number, col: number) => {
-    if (existingSubmission) return;
+    if (hasCompletedGrid) return;
     startTimer();
     const cell = grid?.cells.find((c) => c.row === row && c.col === col);
     if (cell) {
@@ -198,7 +205,7 @@ export default function DashboardPage() {
   };
 
   const doSubmit = async () => {
-    if (!grid || existingSubmission) return;
+    if (!grid || hasCompletedGrid) return;
 
     try {
       stopTimer();
@@ -237,6 +244,8 @@ export default function DashboardPage() {
       
       // Show anonymous results modal if user is not authenticated
       if (!session?.user) {
+        localStorage.setItem(`kickle_anonymous_submission_${grid.gridNumber}`, "true");
+        setAnonymousSubmissionComplete(true);
         setShowAnonymousResults(true);
       } else {
         setShowResults(true);
@@ -563,7 +572,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {!existingSubmission && (
+          {!hasCompletedGrid && (
             <div className="mt-10 sm:mt-12 flex flex-col items-center gap-5 w-full max-w-sm px-4">
               <label className="w-full flex items-start gap-3 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-left cursor-pointer hover:border-[#36e27b]/50 transition-colors">
                 <input
@@ -607,6 +616,27 @@ export default function DashboardPage() {
                 className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl transition-all border border-white/20 hover:border-white/40 text-sm"
               >
                 Go Home
+              </Link>
+            </div>
+          )}
+
+          {!existingSubmission && anonymousSubmissionComplete && (
+            <div className="mt-10 sm:mt-12 text-center flex flex-col sm:flex-row items-center gap-4 justify-center px-4">
+              <p className="text-gray-400 text-sm sm:text-base">You&apos;ve already submitted today&apos;s grid.</p>
+              <button
+                onClick={() => {
+                  setSignInToReplay(true);
+                  setShowSignInPrompt(true);
+                }}
+                className="px-6 py-3 bg-[#36e27b] hover:bg-[#2dd670] text-black font-semibold rounded-xl transition-all text-sm"
+              >
+                Sign in to play again
+              </button>
+              <Link
+                href="/"
+                className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl transition-all border border-white/20 hover:border-white/40 text-sm"
+              >
+                Back to Home
               </Link>
             </div>
           )}
@@ -688,7 +718,10 @@ export default function DashboardPage() {
           answers={submissionResult.answers}
           timeTakenSeconds={submissionResult.timeTakenSeconds}
           userSession={{ user: session?.user }}
-          onSignInPrompt={() => setShowSignInPrompt(true)}
+          onSignInPrompt={() => {
+            setSignInToReplay(false);
+            setShowSignInPrompt(true);
+          }}
         />
       )}
       
@@ -696,8 +729,12 @@ export default function DashboardPage() {
       {submissionResult && (
         <SignInPromptModal
           isOpen={showSignInPrompt}
-          onClose={() => setShowSignInPrompt(false)}
+          onClose={() => {
+            setShowSignInPrompt(false);
+            setSignInToReplay(false);
+          }}
           score={submissionResult.score}
+          callbackURL={signInToReplay ? "/dashboard" : undefined}
         />
       )}
     </div>
